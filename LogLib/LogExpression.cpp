@@ -20,9 +20,9 @@ namespace libTools
 		return static_cast<UINT>(VecFunPtr.size());
 	}
 
-	VOID CLogExpression::SetVecExprFunPtr(_In_ CONST std::vector<ExpressionFunPtr>& ParmVecFunPtr) throw()
+	VOID CLogExpression::SetVecExprFunPtr(_In_ CONST std::vector<ExpressionFunPtr>& Vec ) throw()
 	{
-
+		VecFunPtr = Vec;
 	}
 
 	BOOL CLogExpression::Run(_In_ CONST std::wstring& wsText) throw()
