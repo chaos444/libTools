@@ -64,6 +64,9 @@ namespace libTools
 		// 模拟按键
 		static BOOL		SendKey(_In_ WORD wVk);
 
+		// 模拟按键
+		static BOOL		SendKey(_In_ WORD wVk, _In_ BOOL bPush);
+
 		// 发送文本
 		static BOOL		SendKeys(_In_ LPCWSTR data);
 

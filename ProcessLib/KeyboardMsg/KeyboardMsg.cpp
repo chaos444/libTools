@@ -114,6 +114,19 @@ BOOL libTools::CKeyboardMsg::SendKey(_In_ WORD wVk)
 	return TRUE;
 }
 
+
+BOOL libTools::CKeyboardMsg::SendKey(_In_ WORD wVk, _In_ BOOL bPush)
+{
+	INPUT input = { 0 };
+	input.type = INPUT_KEYBOARD;
+	input.ki.wVk = wVk;
+	input.ki.dwFlags = bPush ? 0 : KEYEVENTF_KEYUP;
+
+
+	SendInput(1, &input, sizeof(INPUT));
+	return TRUE;
+}
+
 BOOL libTools::CKeyboardMsg::SendKeys(_In_ LPCWSTR data)
 {
 	SHORT vk	= 0;
