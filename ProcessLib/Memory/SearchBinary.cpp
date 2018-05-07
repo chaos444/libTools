@@ -4,24 +4,14 @@
 
 DWORD libTools::CSearchBinary::FindAddr(_In_ LPCSTR lpszCode, _In_ int nOffset, _In_ int nOrderNum, _In_ LPCWSTR lpszModule)
 {
-	DWORD	dwArray[10] = { 0 };
-	UINT	uArrayLen = 0x0;
-	DWORD	dwAddr = 0x0;
+	std::vector<DWORD>  VecAddr;
+	DWORD				dwAddr = 0x0;
+
 
 	//开始搜索基址
-	if (SearchBase(lpszCode, dwArray, uArrayLen, lpszModule))
+	if (SearchBase(lpszCode, lpszModule, VecAddr) && nOrderNum < static_cast<int>(VecAddr.size()))
 	{
-		if (uArrayLen == 1)//判断只有一个的时候
-			dwAddr = dwArray[0];
-		else
-			dwAddr = dwArray[nOrderNum];
-	}
-
-	if (dwAddr != 0x0) {
-		if (nOffset >= 0)
-			dwAddr -= abs(nOffset);
-		else
-			dwAddr += abs(nOffset);
+		dwAddr = nOffset >= 0 ? VecAddr.at(nOrderNum) - abs(nOffset) : VecAddr.at(nOrderNum) + abs(nOffset);
 	}
 
 
@@ -30,70 +20,50 @@ DWORD libTools::CSearchBinary::FindAddr(_In_ LPCSTR lpszCode, _In_ int nOffset, 
 
 DWORD libTools::CSearchBinary::FindCALL(_In_ LPCSTR lpszCode, _In_ int nOffset, _In_ int nMov, _In_ int nOrderNum, _In_ LPCWSTR lpszModule)
 {
-	DWORD	dwArray[10] = { 0 };
-	UINT	uArrayLen = 0x0;
-	DWORD	dwCALL = 0x0;
-	DWORD	dwAddr = 0x0;
+	std::vector<DWORD>  VecAddr;
+	DWORD				dwCALL = 0x0;
+	DWORD				dwAddr = 0x0;
+
 
 	//开始搜索基址
-	if (SearchBase(lpszCode, dwArray, uArrayLen, lpszModule))
+	if (SearchBase(lpszCode, lpszModule, VecAddr) && nOrderNum < static_cast<int>(VecAddr.size()))
 	{
-		if (uArrayLen == 1)//判断只有一个的时候
-			dwAddr = dwArray[0];
-		else
-			dwAddr = dwArray[nOrderNum];
-	}
+		dwAddr = nOffset >= 0 ? VecAddr.at(nOrderNum) - abs(nOffset) : VecAddr.at(nOrderNum) + abs(nOffset);
 
-	if (dwAddr != 0x0)
-	{
-		if (nOffset >= 0)
-			dwAddr -= abs(nOffset);
-		else
-			dwAddr += abs(nOffset);
 
 		// 不是CALL!
-		if (CMemory::ReadBYTE(dwAddr) != 0xE8)
-			return 0x0;
-
-		//首先计算相对地址
-		DWORD dwModuleAddr = reinterpret_cast<DWORD>(::GetModuleHandleW(lpszModule));
-		DWORD dwRelativeAddr = dwAddr - (dwModuleAddr + 0x1000) + 0x1000 + nMov;
-		dwRelativeAddr += dwModuleAddr;
-		DWORD dwReadAddr = CMemory::ReadDWORD(dwRelativeAddr);
-		dwReadAddr += 4;
-		dwReadAddr += dwRelativeAddr;
-		dwCALL = dwReadAddr & 0xFFFFFFFF;
+		if (CMemory::ReadBYTE(dwAddr) == 0xE8)
+		{
+			//首先计算相对地址
+			DWORD dwModuleAddr = reinterpret_cast<DWORD>(::GetModuleHandleW(lpszModule));
+			DWORD dwRelativeAddr = dwAddr - (dwModuleAddr + 0x1000) + 0x1000 + nMov;
+			dwRelativeAddr += dwModuleAddr;
+			DWORD dwReadAddr = CMemory::ReadDWORD(dwRelativeAddr);
+			dwReadAddr += 4;
+			dwReadAddr += dwRelativeAddr;
+			dwCALL = dwReadAddr & 0xFFFFFFFF;
+		}
 	}
+
 
 	return dwCALL;
 }
 
 DWORD libTools::CSearchBinary::FindBase(_In_ LPCSTR lpszCode, _In_ int nOffset, _In_ int nMov, _In_ int nOrderNum, _In_ LPCWSTR lpszModule, DWORD dwAddrLen /* = 0xFFFFFFFF */)
 {
-	DWORD	dwArray[10] = { 0 };
-	UINT	uArrayLen = 0x0;
-	DWORD	dwBase = 0x0;
-	DWORD	dwAddr = 0x0;
+	std::vector<DWORD>  VecAddr;
+	DWORD				dwBase = 0x0;
+	DWORD				dwAddr = 0x0;
+
 
 	//开始搜索基址
-	if (SearchBase(lpszCode, dwArray, uArrayLen, lpszModule))
+	if (SearchBase(lpszCode, lpszModule, VecAddr) && nOrderNum < static_cast<int>(VecAddr.size()))
 	{
-		if (uArrayLen == 1)//判断只有一个的时候
-			dwAddr = dwArray[0];
-		else
-			dwAddr = dwArray[nOrderNum];
-	}
-
-	if (dwAddr != 0x0)
-	{
-		if (nOffset >= 0)
-			dwAddr -= abs(nOffset);
-		else
-			dwAddr += abs(nOffset);
-
+		dwAddr = nOffset >= 0 ? VecAddr.at(nOrderNum) - abs(nOffset) : VecAddr.at(nOrderNum) + abs(nOffset);
 		dwAddr += nMov;
 		dwBase = CMemory::ReadDWORD(dwAddr)&dwAddrLen;
 	}
+
 
 	return dwBase;
 }
@@ -108,12 +78,31 @@ DWORD libTools::CSearchBinary::FindBase_ByCALL(_In_ LPCSTR lpszCode, _In_ int nO
 	return CMemory::ReadDWORD(dwCALL) & dwAddrLen;
 }
 
-BOOL libTools::CSearchBinary::SearchBase(_In_ LPCSTR szCode, _Out_ DWORD * pArray, _Out_ UINT& puLen, _In_ LPCWSTR lpszModule)
+
+UINT libTools::CSearchBinary::FindAddr(_In_ LPCSTR lpszCode, _In_ int nOffset, _In_ LPCWSTR lpszModule, _Out_ std::vector<DWORD>& Vec)
+{
+	std::vector<DWORD>  VecAddr;
+	DWORD				dwAddr = 0x0;
+
+
+	//开始搜索基址
+	if (SearchBase(lpszCode, lpszModule, VecAddr))
+	{
+		for (auto& itm : VecAddr)
+		{
+			dwAddr = nOffset >= 0 ? itm - abs(nOffset) : itm + abs(nOffset);
+			Vec.push_back(itm);
+		}
+	}
+
+	return Vec.size();
+}
+
+BOOL libTools::CSearchBinary::SearchBase(_In_ LPCSTR szCode, _In_ LPCWSTR lpszModule, _Out_ std::vector<DWORD>& Vec)
 {
 	SYSTEM_INFO		si;
 	MEMORY_BASIC_INFORMATION		mbi;
 
-	BOOL	bRetCode = FALSE;
 
 	//将字符串转换成BYTE数组
 	UINT uCodeLen = static_cast<UINT>(strlen(szCode)) / 2;
@@ -169,25 +158,16 @@ BOOL libTools::CSearchBinary::SearchBase(_In_ LPCSTR szCode, _Out_ DWORD * pArra
 			std::vector<int> vlst;
 			CL_sunday(pCode, uCodeLen, reinterpret_cast<BYTE *>(mbi.BaseAddress), mbi.RegionSize, vlst);
 
-			for (UINT i = 0; i < vlst.size() && puLen < 10; ++i)
+			for (UINT i = 0; i < vlst.size() ; ++i)
 			{
-				pArray[puLen] = reinterpret_cast<DWORD>(mbi.BaseAddress) + vlst.at(i);
-				++puLen;
+				Vec.push_back(reinterpret_cast<DWORD>(mbi.BaseAddress) + vlst.at(i));
 			}
 
 		}
 	}
 
-	if (puLen >= 10)
-	{
-		bRetCode = TRUE;
-	}
-	else if (puLen < 10 && puLen > 0)
-	{
-		bRetCode = TRUE;
-	}
 	delete[] pCode;
-	return bRetCode;
+	return !Vec.empty();
 }
 
 DWORD libTools::CSearchBinary::GetImageSize(_In_ DWORD dwImageBase)
