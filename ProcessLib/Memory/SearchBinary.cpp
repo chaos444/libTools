@@ -131,15 +131,16 @@ BOOL libTools::CSearchBinary::SearchBase(_In_ LPCSTR szCode, _In_ LPCWSTR lpszMo
 	//初始化
 	::GetSystemInfo(&si);
 	HANDLE hProcess = ::GetCurrentProcess();
-	DWORD dwImageBase = static_cast<DWORD>(reinterpret_cast<UINT_PTR>(::GetModuleHandleW(lpszModule)));
-	if (dwImageBase == NULL)
+	if (lpszModule != NULL && ::GetModuleHandleW(lpszModule) == NULL)
 	{
+
 		return FALSE;
 	}
-
-	DWORD dwImageSize = GetImageSize(dwImageBase);
+	DWORD dwImageBase = lpszModule == NULL ? 0x400000 : static_cast<DWORD>(reinterpret_cast<UINT_PTR>(::GetModuleHandleW(lpszModule)));
+	DWORD dwImageSize = dwImageBase == NULL ? 0x7FFFFFFF : GetImageSize(dwImageBase);
 	if (dwImageSize == NULL)
 	{
+		MessageBoxW(NULL, L"不存在的模块!", L"Error", NULL);
 		return FALSE;
 	}
 
