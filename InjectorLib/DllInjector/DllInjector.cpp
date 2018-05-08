@@ -204,6 +204,22 @@ BOOL libTools::CDllInjector::PromotionAuthority()
 	return RaisePrivilige(SE_DEBUG_NAME) && RaisePrivilige(SE_SECURITY_NAME);
 }
 
+BOOL libTools::CDllInjector::IsRunAsAdministrator()
+{
+	BOOL fRet = FALSE;
+	HANDLE hToken = NULL;
+	if (::OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) 
+	{
+		TOKEN_ELEVATION Elevation;
+		DWORD cbSize = sizeof(TOKEN_ELEVATION);
+		fRet = ::GetTokenInformation(hToken, TokenElevation, &Elevation, sizeof(Elevation), &cbSize) && Elevation.TokenIsElevated;
+		::CloseHandle(hToken);
+	}
+
+
+	return fRet;
+}
+
 BOOL libTools::CDllInjector::RaisePrivilige(_In_ LPCWSTR pwszPrivilegeName)
 {
 	//提升权限，代码实例

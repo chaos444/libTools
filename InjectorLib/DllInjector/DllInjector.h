@@ -21,8 +21,11 @@ namespace libTools
 		// Create Process and Injector DLL to this Process .. (wsDllPath couldn't be empty) use shellcode to Injector DLL ....
 		static BOOL CreateProcess_And_ShellCodeInjectorDLL(_In_ CONST std::wstring& wsProcessCommand, _In_ CONST std::wstring& wsDllPath, _Out_opt_ PROCESS_INFORMATION* pProcInfo = nullptr);
 
-		// 
+		// Promote
 		static BOOL PromotionAuthority();
+
+		//
+		static BOOL IsRunAsAdministrator();
 	private:
 		// 
 		static BOOL RaisePrivilige(_In_ LPCWSTR pwszPrivilegeName);

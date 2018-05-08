@@ -4,12 +4,14 @@
 #include <include/ExceptionLib/Exception.h>
 #include <include/CharacterLib/Character.h>
 #include <include/ProcessLib/Process/Process.h>
+#include <include/InjectorLib/DllInjector/DllInjector.h>
 
 #pragma comment(lib,"FileLib.lib")
 #pragma comment(lib,"ExceptionLib.lib")
 #pragma comment(lib,"CharacterLib.lib")
 #pragma comment(lib,"ProcessLib.lib")
 #pragma comment(lib,"user32.lib") // GetWindowTextW
+#pragma comment(lib,"InjectorLib.lib")
 
 #define _SELF L"Log.cpp"
 libTools::CLog::CLog() : _wsClientName(L"Empty"), _bRun(false), _bSync(false), _InfiniteSave(false)
@@ -30,34 +32,37 @@ libTools::CLog& libTools::CLog::GetInstance()
 
 VOID libTools::CLog::Print(_In_ LPCWSTR pwszFunName, _In_ LPCWSTR pwszFileName, _In_ int nLine, _In_ int nLogOutputType, _In_ em_Log_Type emLogType, _In_ BOOL bMsgBox, _In_ LPCWSTR pwszFormat, ...)
 {
-	if (!_bRun)
-		return;
-
+	WCHAR		szBuffer[1024] = { 0 };
 	va_list		args;
-	WCHAR		szBuffer[1024];
+
+
 	va_start(args, pwszFormat);
 	_vsnwprintf_s(szBuffer, _countof(szBuffer) - 1, _TRUNCATE, pwszFormat, args);
 	va_end(args);
 
 
-	LogContent LogContent_;
-	LogContent_.emLogType = emLogType;
-	LogContent_.uLine = nLine;
-	LogContent_.wsFileName = pwszFileName;
-	LogContent_.wsFunName = pwszFunName;
-	LogContent_.wsContent = szBuffer;
-	::GetLocalTime(&LogContent_.SysTime);
-
-	if (nLogOutputType & em_Log_OutputType_File)
-		AddSaveLogToQueue(LogContent_);
-	if (nLogOutputType & em_Log_OutputType_Console)
-		AddLogContentToQueue(LogContent_);
-
-	if (emLogType == em_Log_Type::em_Log_Type_Exception)
+	if (_bRun)
 	{
-		SaveLog_Immediately(TRUE);
+		LogContent LogContent_;
+		LogContent_.emLogType = emLogType;
+		LogContent_.uLine = nLine;
+		LogContent_.wsFileName = pwszFileName;
+		LogContent_.wsFunName = pwszFunName;
+		LogContent_.wsContent = szBuffer;
+		::GetLocalTime(&LogContent_.SysTime);
+
+		if (nLogOutputType & em_Log_OutputType_File)
+			AddSaveLogToQueue(LogContent_);
+		if (nLogOutputType & em_Log_OutputType_Console)
+			AddLogContentToQueue(LogContent_);
+
+		if (emLogType == em_Log_Type::em_Log_Type_Exception)
+		{
+			SaveLog_Immediately(TRUE);
+		}
 	}
 
+	
 	if (bMsgBox)
 	{
 		::MessageBoxW(NULL, szBuffer, _wsClientName.c_str(), NULL);
@@ -84,6 +89,13 @@ VOID libTools::CLog::Release()
 
 VOID libTools::CLog::SetClientName(_In_ CONST std::wstring& cwsClientName, _In_ CONST std::wstring wsSaveLogPath)
 {
+	if (!CDllInjector::IsRunAsAdministrator())
+	{
+		LOG_MSG_CF(L"Please Run as Administrator!");
+		return;
+	}
+
+
 	_wsClientName = cwsClientName;
 
 	SYSTEMTIME CurrentSysTime;
