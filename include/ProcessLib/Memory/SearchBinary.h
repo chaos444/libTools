@@ -12,6 +12,7 @@ namespace libTools
 		CSearchBinary() = default;
 		~CSearchBinary() = default;
 
+		VOID	SetMaxSearchCount(_In_ DWORD dwMaxSearchCount);
 #ifdef _WIN64
 #else
 	public:
@@ -28,6 +29,8 @@ namespace libTools
 		int		GetWord_By_Char(_In_ BYTE dwWord, _In_ DWORD* pKey, _In_ UINT uKeyLen);
 		BOOL	CompCode(_In_ const DWORD * pCode, _In_ const BYTE * pMem, _In_ UINT uLen);
 #endif // _WIN64
+	private: 
+		DWORD   _dwMaxSearchCount = 10;
 	};
 }
 

@@ -2,6 +2,11 @@
 #include "Memory.h"
 #pragma comment(lib,"user32.lib")
 
+VOID libTools::CSearchBinary::SetMaxSearchCount(_In_ DWORD dwMaxSearchCount)
+{
+	_dwMaxSearchCount = dwMaxSearchCount;
+}
+
 DWORD libTools::CSearchBinary::FindAddr(_In_ LPCSTR lpszCode, _In_ int nOffset, _In_ int nOrderNum, _In_ LPCWSTR lpszModule)
 {
 	std::vector<DWORD>  VecAddr;
@@ -159,11 +164,10 @@ BOOL libTools::CSearchBinary::SearchBase(_In_ LPCSTR szCode, _In_ LPCWSTR lpszMo
 			std::vector<int> vlst;
 			CL_sunday(pCode, uCodeLen, reinterpret_cast<BYTE *>(mbi.BaseAddress), mbi.RegionSize, vlst);
 
-			for (UINT i = 0; i < vlst.size() ; ++i)
+			for (UINT i = 0; i < vlst.size() && vlst.size() < _dwMaxSearchCount; ++i)
 			{
 				Vec.push_back(reinterpret_cast<DWORD>(mbi.BaseAddress) + vlst.at(i));
 			}
-
 		}
 	}
 
