@@ -129,6 +129,11 @@ namespace libTools
 		_LogExpression.Push(std::bind(&CLogExpressionPeLoader::PeLoader, std::placeholders::_1), L"PeLoader");
 	}
 
+	VOID CCmdLog::PrintHelp()
+	{
+		_LogExpression.Run(L"Help()");
+	}
+
 	BOOL CCmdLog::ConnectLogServer()
 	{
 		if (_skClient == INVALID_SOCKET)

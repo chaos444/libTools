@@ -45,6 +45,8 @@ namespace libTools
 		VOID ExcuteLogServerCmd(_In_ CONST std::wstring& wsCmdText);
 
 		VOID EnableGloablMethod();
+
+		VOID PrintHelp();
 	private:
 		static DWORD WINAPI _RecvThread(LPVOID lpParm);
 
