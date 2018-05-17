@@ -7,6 +7,8 @@
 
 #pragma comment(lib,"CharacterLib.lib")
 #pragma comment(lib,"ExceptionLib.lib")
+#pragma comment(lib,"user32.lib")
+#pragma comment(lib,"Ws2_32.lib")
 namespace libTools
 {
 	CSocketRemoteClient::CSocketRemoteClient(_In_ UINT_PTR Sock) : _Socket(Sock), _pTpIo(nullptr), _uBufferSize(0), _uBufferMaxSize(0), _bExist(false), _bLock(false)
@@ -35,6 +37,11 @@ namespace libTools
 	BOOL CSocketRemoteClient::InExist() CONST
 	{
 		return _bExist;
+	}
+
+	BOOL CSocketRemoteClient::IsKeepALiveTimeout() CONST
+	{
+		return _ulKeepALiveTick == NULL || ::GetTickCount64() - _ulKeepALiveTick >= 60 * 1000;
 	}
 
 	VOID CSocketRemoteClient::SetBuffer(_In_ CONST CHAR* Buffer, _In_ UINT uLen)
@@ -77,6 +84,7 @@ namespace libTools
 		if (_Socket != INVALID_SOCKET)
 		{
 			::shutdown(_Socket, SD_BOTH);
+			_bExist = false;
 		}
 	}
 
@@ -138,4 +146,10 @@ namespace libTools
 	{
 		_ExistPostRecv = IsExistPostRecv;
 	}
+
+	VOID CSocketRemoteClient::SetKeepALive()
+	{
+		_ulKeepALiveTick = ::GetTickCount64();
+	}
+
 }

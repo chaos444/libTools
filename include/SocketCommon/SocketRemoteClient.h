@@ -36,7 +36,7 @@ namespace libTools
 		virtual BOOL InExist() CONST;
 
 		// 是否心跳超时
-		virtual BOOL IsKeepALiveTimeout() CONST = NULL;
+		virtual BOOL IsKeepALiveTimeout() CONST;
 
 		// 将粘包的缓冲区甩过来
 		VOID	SetBuffer(_In_ CONST CHAR* Buffer, _In_ UINT uLen);
@@ -80,6 +80,8 @@ namespace libTools
 		BOOL	ExistPostRecv() CONST;
 
 		VOID	SetExistPostRecv(_In_ BOOL IsExistPostRecv);
+
+		VOID    SetKeepALive();
 	public:
 		enum { em_Buffer_Len = 1024 };
 	private:
@@ -91,7 +93,8 @@ namespace libTools
 		BYTE               _RecvBuffer[em_Buffer_Len];
 		ULONGLONG		   _ulCreateTick;
 		UINT			   _uRefCount;
-		BOOL				_ExistPostRecv;
+		BOOL			   _ExistPostRecv;
+		ULONGLONG		   _ulKeepALiveTick = NULL;
 	protected:
 		bool			   _bExist;
 		bool			   _bLock;
