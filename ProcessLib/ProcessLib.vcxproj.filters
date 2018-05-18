@@ -33,6 +33,9 @@
     <ClCompile Include="KeyboardMsg\KeyboardMsg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Lock\Lock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AntiRootkit\AntiRootkit.h">
@@ -54,6 +57,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Common\ResHandleManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Lock\Lock.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
