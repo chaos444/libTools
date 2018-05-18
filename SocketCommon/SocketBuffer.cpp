@@ -1,7 +1,6 @@
 #include "SocketBuffer.h"
 #include <include/CharacterLib/Character.h>
 
-#pragma comment(lib,"CharacterLib.lib")
 
 libTools::CSocketBuffer::CSocketBuffer() : _dwMsgHead(NULL)
 {

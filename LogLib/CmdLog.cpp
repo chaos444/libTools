@@ -10,7 +10,7 @@
 #include "LogExpressionPeLoader.h"
 #pragma  comment (lib,"wsock32.lib") 
 #pragma  comment (lib, "Ws2_32.lib")
-#pragma  comment (lib, "CharacterLib.lib")
+
 
 #define _SELF L"CmdLog.cpp"
 

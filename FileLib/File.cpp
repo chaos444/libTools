@@ -5,8 +5,6 @@
 #include <include/ExceptionLib/Exception.h>
 
 
-#pragma comment(lib,"CharacterLib.lib")
-#pragma comment(lib,"ExceptionLib.lib")
 #pragma comment(lib,"Shlwapi.lib")
 
 namespace libTools

@@ -1,8 +1,7 @@
 #include "IATHook.h"
 #include <include/LogLib/Log.h>
 #include <include/CharacterLib/Character.h>
-#pragma comment(lib,"LogLib.lib")
-#pragma comment(lib,"CharacterLib.lib")
+
 
 #define _SELF L"IATHook.cpp"
 BOOL libTools::CIATHook::Hook(_In_ CONST std::string& szDLLName, _In_ CONST std::string& szMethodName, _In_ LPVOID HookProcPtr, _Out_opt_ LPVOID* pRealProcPtr)

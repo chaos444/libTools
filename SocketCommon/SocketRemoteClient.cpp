@@ -5,8 +5,7 @@
 #include <include/ExceptionLib/Exception.h>
 #include "SocketBuffer.h"
 
-#pragma comment(lib,"CharacterLib.lib")
-#pragma comment(lib,"ExceptionLib.lib")
+
 #pragma comment(lib,"user32.lib")
 #pragma comment(lib,"Ws2_32.lib")
 namespace libTools

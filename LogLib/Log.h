@@ -18,6 +18,7 @@
 #define CON_LOG_CF_D(Con,FormatText,...)  if(Con) { LOG_CF_D(FormatText, __VA_ARGS__); }
 #define CON_LOG_CF_E(Con,FormatText,...)  if(Con) { LOG_CF_E(FormatText, __VA_ARGS__); }
 
+
 namespace libTools
 {
 	class CLog

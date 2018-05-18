@@ -2,8 +2,7 @@
 #include <include/FileLib/File.h>
 #include <include/HookLib/InlineHook/InlineHook.h>
 
-#pragma comment(lib,"HookLib.lib")
-#pragma comment(lib,"FileLib.lib")
+
 
 libTools::CNoTraceModuleInjector::RtlInitUnicodeStringPtr		libTools::CNoTraceModuleInjector::_RtlInitUnicodeStringPtr	= nullptr;
 libTools::CNoTraceModuleInjector::NtUnmapViewOfSectionPtr		libTools::CNoTraceModuleInjector::_NtUnmapViewOfSectionPtr	= nullptr;

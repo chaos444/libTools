@@ -7,7 +7,6 @@
 #include <include/CharacterLib/Character.h>
 
 #pragma comment(lib,"Psapi.lib")
-#pragma comment(lib,"CharacterLib.lib")
 #pragma comment(lib,"Shlwapi.lib")
 
 DWORD libTools::CProcess::FindPidByProcName(_In_ CONST std::wstring& wsProcName)

@@ -2,10 +2,7 @@
 #include "Log.h"
 #include <include/CharacterLib/Character.h>
 
-#pragma comment(lib,"CharacterLib.lib")
-
 #define _SELF L"CLogExpression.cpp"
-
 namespace libTools
 {
 	CExprFunBase::CExprFunBase()

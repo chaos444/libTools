@@ -11,11 +11,7 @@
 #include <include/CharacterLib/Character.h>
 #include <include/TimeLib/TimeTick.h>
 
-#pragma comment(lib,"LogLib.lib")
-#pragma comment(lib,"ExceptionLib.lib")
-#pragma comment(lib,"SocketCommonLib.lib")
-#pragma comment(lib,"CharacterLib.lib")
-#pragma comment(lib,"TimeLib.lib")
+
 #pragma comment(lib,"Ws2_32.lib")
 
 #define _SELF L"SocketBaseClientService.cpp"

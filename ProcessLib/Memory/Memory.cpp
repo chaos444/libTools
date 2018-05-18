@@ -4,7 +4,6 @@
 
 
 #pragma comment(lib,"Psapi.lib")
-#pragma comment(lib,"CharacterLib.lib")
 
 BOOL libTools::CMemory::ClearWorkingMemory()
 {

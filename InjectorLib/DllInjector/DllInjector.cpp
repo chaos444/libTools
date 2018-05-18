@@ -3,8 +3,7 @@
 #include <include/ProcessLib/Common/ResHandleManager.h>
 #include <include/LogLib/Log.h>
 
-#pragma comment(lib,"ProcessLib.lib")
-#pragma comment(lib,"LogLib.lib")
+
 #pragma comment(lib,"Advapi32.lib")
 
 #define _SELF L"DllInjector.cpp"

@@ -3,7 +3,6 @@
 #include <time.h> // mktime()
 #include <include/CharacterLib/Character.h>
 
-#pragma comment(lib,"CharacterLib.lib")
 
 bool libTools::CTimeCharacter::TimeContent::operator==(_In_ CONST TimeContent& Content) CONST
 {

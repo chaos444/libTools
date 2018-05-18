@@ -6,12 +6,9 @@
 #include <include/ProcessLib/Process/Process.h>
 #include <include/InjectorLib/DllInjector/DllInjector.h>
 
-#pragma comment(lib,"FileLib.lib")
-#pragma comment(lib,"ExceptionLib.lib")
-#pragma comment(lib,"CharacterLib.lib")
-#pragma comment(lib,"ProcessLib.lib")
+
 #pragma comment(lib,"user32.lib") // GetWindowTextW
-#pragma comment(lib,"InjectorLib.lib")
+
 
 #define _SELF L"Log.cpp"
 libTools::CLog::CLog() : _wsClientName(L"Empty"), _bRun(false), _bSync(false), _InfiniteSave(false)

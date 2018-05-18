@@ -3,8 +3,7 @@
 #include <include/ProcessLib/Memory/Memory.h>
 #include "LdrHeader.h"
 
-#pragma comment(lib,"ExceptionLib.lib")
-#pragma comment(lib,"ProcessLib.lib")
+
 BOOL libTools::CInlineHook::Hook(_In_ _Out_ HookContent* pHookContent)
 {
 	return CException::InvokeFunc<BOOL>(__FUNCTIONW__, [&]

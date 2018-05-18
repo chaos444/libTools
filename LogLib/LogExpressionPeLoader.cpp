@@ -3,8 +3,6 @@
 #include <include/CharacterLib/Character.h>
 #include "Log.h"
 
-#pragma comment(lib,"FileLib.lib")
-#pragma comment(lib,"CharacterLib.lib")
 
 #define _SELF L"ExprPE.cpp"
 libTools::CLogExpressionPeLoader::~CLogExpressionPeLoader()

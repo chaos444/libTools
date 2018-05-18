@@ -3,7 +3,7 @@
 #include <include/CharacterLib/Character.h>
 #include "Dasm.h"
 
-#pragma comment(lib,"CharacterLib.lib")
+
 namespace libTools
 {
 #define JMP_SIZE		5

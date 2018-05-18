@@ -4,9 +4,6 @@
 #include <include/ProcessLib/Memory/Memory.h>
 #include "Log.h"
 
-#pragma comment(lib,"CharacterLib.lib")
-#pragma comment(lib,"ProcessLib.lib")
-
 #define _SELF L"CLogExpressionCalc.cpp"
 
 namespace libTools

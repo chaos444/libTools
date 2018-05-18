@@ -5,7 +5,6 @@
 #include <ExceptionLib/Exception.h>
 
 
-
 namespace libTools
 {
 	class CCharacter

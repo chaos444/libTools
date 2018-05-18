@@ -3,9 +3,6 @@
 #include <include/CharacterLib/Character.h>
 #include <include/LogLib/Log.h>
 
-#pragma comment(lib,"ExceptionLib.lib")
-#pragma comment(lib,"LogLib.lib")
-#pragma comment(lib,"CharacterLib.lib")
 #pragma comment(lib,"ODBC32.lib")
 
 #define _SELF L"DbManager.cpp"
