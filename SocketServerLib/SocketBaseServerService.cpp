@@ -11,6 +11,19 @@
 #include <include/CharacterLib/Character.h>
 #include <include/TimeLib/TimeTick.h>
 
+#ifdef _DEBUG
+#pragma comment(lib,"LogLib_Debug.lib")
+#pragma comment(lib,"SocketCommonLib_Debug.lib")
+#pragma comment(lib,"CharacterLib_Debug.lib")
+#pragma comment(lib,"TimeLib_Debug.lib")
+#pragma comment(lib,"ExceptionLib_Debug.lib")
+#else
+#pragma comment(lib,"LogLib.lib")
+#pragma comment(lib,"SocketCommonLib.lib")
+#pragma comment(lib,"CharacterLib.lib")
+#pragma comment(lib,"TimeLib.lib")
+#pragma comment(lib,"ExceptionLib.lib")
+#endif // _DEBUG
 
 #pragma comment(lib,"Ws2_32.lib")
 

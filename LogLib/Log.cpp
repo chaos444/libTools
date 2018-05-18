@@ -7,6 +7,19 @@
 #include <include/InjectorLib/DllInjector/DllInjector.h>
 
 
+#ifdef _DEBUG
+#pragma comment(lib,"FileLib_Debug.lib")
+#pragma comment(lib,"ExceptionLib_Debug.lib")
+#pragma comment(lib,"CharacterLib_Debug.lib")
+#pragma comment(lib,"ProcessLib_Debug.lib")
+#pragma comment(lib,"InjectorLib_Debug.lib")
+#else
+#pragma comment(lib,"FileLib.lib")
+#pragma comment(lib,"ExceptionLib.lib")
+#pragma comment(lib,"CharacterLib.lib")
+#pragma comment(lib,"ProcessLib.lib")
+#pragma comment(lib,"InjectorLib.lib")
+#endif // _DEBUG
 #pragma comment(lib,"user32.lib") // GetWindowTextW
 
 

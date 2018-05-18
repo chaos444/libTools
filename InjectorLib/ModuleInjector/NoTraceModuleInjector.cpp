@@ -2,6 +2,11 @@
 #include <include/FileLib/File.h>
 #include <include/HookLib/InlineHook/InlineHook.h>
 
+#ifdef _DEBUG
+#pragma comment(lib,"FileLib_Debug.lib")
+#else
+#pragma comment(lib,"FileLib.lib")
+#endif // _DEBUG
 
 
 libTools::CNoTraceModuleInjector::RtlInitUnicodeStringPtr		libTools::CNoTraceModuleInjector::_RtlInitUnicodeStringPtr	= nullptr;

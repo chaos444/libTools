@@ -3,6 +3,13 @@
 #include <include/ProcessLib/Memory/Memory.h>
 #include "LdrHeader.h"
 
+#ifdef _DEBUG
+#pragma comment(lib,"ExceptionLib_Debug.lib")
+#pragma comment(lib,"ProcessLib_Debug.lib")
+#else
+#pragma comment(lib,"ExceptionLib.lib")
+#pragma comment(lib,"ProcessLib.lib")
+#endif // _DEBUG
 
 BOOL libTools::CInlineHook::Hook(_In_ _Out_ HookContent* pHookContent)
 {

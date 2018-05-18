@@ -2,6 +2,12 @@
 #include <include/LogLib/Log.h>
 #include <include/CharacterLib/Character.h>
 
+#ifdef _DEBUG
+#pragma comment(lib,"CharacterLib_Debug.lib")
+#else
+#pragma comment(lib,"CharacterLib.lib")
+#endif // _DEBUG
+
 
 #define _SELF L"IATHook.cpp"
 BOOL libTools::CIATHook::Hook(_In_ CONST std::string& szDLLName, _In_ CONST std::string& szMethodName, _In_ LPVOID HookProcPtr, _Out_opt_ LPVOID* pRealProcPtr)

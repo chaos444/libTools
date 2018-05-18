@@ -2,6 +2,15 @@
 #include <include/LogLib/Log.h>
 #include <include/ProcessLib/Common/ResHandleManager.h>
 
+#ifdef _DEBUG
+#pragma comment(lib,"LogLib_Debug.lib")
+#pragma comment(lib,"ProcessLib_Debug.lib")
+#else
+#pragma comment(lib,"LogLib.lib")
+#pragma comment(lib,"ProcessLib.lib")
+#endif // _DEBUG
+
+
 #define _SELF L"GdiScreenshot.cpp"
 BOOL libTools::CGdiScreenshot::Screenshot(_In_ HWND hWnd, _In_ CONST std::wstring& wsPath)
 {

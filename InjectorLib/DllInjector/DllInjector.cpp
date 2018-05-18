@@ -3,6 +3,11 @@
 #include <include/ProcessLib/Common/ResHandleManager.h>
 #include <include/LogLib/Log.h>
 
+#ifdef _DEBUG
+#pragma comment(lib,"LogLib_Debug.lib")
+#else
+#pragma comment(lib,"LogLib.lib")
+#endif // _DEBUG
 
 #pragma comment(lib,"Advapi32.lib")
 

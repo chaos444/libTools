@@ -1,7 +1,11 @@
 #include "KeyboardMsg.h"
 #include <include/CharacterLib/Character.h>
 
-
+#ifdef _DEBUG
+#pragma comment(lib,"CharacterLib_Debug.lib")
+#else
+#pragma comment(lib,"CharacterLib.lib")
+#endif // _DEBUG
 
 BOOL libTools::CKeyboardMsg::SimulationKey(_In_ HWND hWnd, _In_ CHAR dwASCII, _In_opt_ DWORD dwTime /*= 10*/)
 {

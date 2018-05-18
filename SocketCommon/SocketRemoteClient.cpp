@@ -5,6 +5,13 @@
 #include <include/ExceptionLib/Exception.h>
 #include "SocketBuffer.h"
 
+#ifdef _DEBUG
+#pragma comment(lib,"CharacterLib_Debug.lib")
+#pragma comment(lib,"ExceptionLib_Debug.lib")
+#else
+#pragma comment(lib,"CharacterLib.lib")
+#pragma comment(lib,"ExceptionLib.lib")
+#endif // _DEBUG
 
 #pragma comment(lib,"user32.lib")
 #pragma comment(lib,"Ws2_32.lib")

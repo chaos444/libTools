@@ -9,6 +9,12 @@
 #pragma comment(lib,"Psapi.lib")
 #pragma comment(lib,"Shlwapi.lib")
 
+#ifdef _DEBUG
+#pragma comment(lib,"CharacterLib_Debug.lib")
+#else
+#pragma comment(lib,"CharacterLib.lib")
+#endif // _DEBUG
+
 DWORD libTools::CProcess::FindPidByProcName(_In_ CONST std::wstring& wsProcName)
 {
 	std::vector<ProcessContent> Vec;

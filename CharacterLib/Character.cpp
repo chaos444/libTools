@@ -2,6 +2,13 @@
 #include <io.h>		// _setmode & _fileno
 #include <fcntl.h>	// _O_U8TEXT
 
+#ifdef _DEBUG
+#pragma comment(lib,"ExceptionLib_Debug.lib")
+#else
+#pragma comment(lib,"ExceptionLib.lib")
+#endif // _DEBUG
+
+
 namespace libTools
 {
 	std::string CCharacter::UnicodeToASCII(_In_ CONST std::wstring& wstr)
