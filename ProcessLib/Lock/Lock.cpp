@@ -1,31 +1,31 @@
 #include "Lock.h"
 
-void CMutexLock::Lock()
+void libTools::CMutexLock::Lock()
 {
 	_Lock.lock();
 }
 
-void CMutexLock::UnLock()
+void libTools::CMutexLock::UnLock()
 {
 	_Lock.unlock();
 }
 
-CThreadLock::CThreadLock()
+libTools::CThreadLock::CThreadLock()
 {
 	::InitializeCriticalSection(&_Lock);
 }
 
-CThreadLock::~CThreadLock()
+libTools::CThreadLock::~CThreadLock()
 {
 	::DeleteCriticalSection(&_Lock);
 }
 
-void CThreadLock::Lock()
+void libTools::CThreadLock::Lock()
 {
 	::EnterCriticalSection(&_Lock);
 }
 
-void CThreadLock::UnLock()
+void libTools::CThreadLock::UnLock()
 {
 	::LeaveCriticalSection(&_Lock);
 }
