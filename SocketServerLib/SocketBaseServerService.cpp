@@ -26,6 +26,7 @@
 #endif // _DEBUG
 
 #pragma comment(lib,"Ws2_32.lib")
+#pragma comment(lib,"Mswsock.lib")
 
 #define _SELF L"SocketBaseServerService.cpp"
 libTools::CSocketBaseServerService::ServerThreadContent* libTools::CSocketBaseServerService::ServerThreadContent::Create(_In_ CSocketBaseServerService* pServer_, _In_ LPVOID Reserve_ /*= nullptr*/)
@@ -731,4 +732,5 @@ BOOL libTools::CSocketBaseServerService::AcceptEx(_In_ _Out_ CSocketRemoteClient
 	::GetAcceptExSockaddrs(&Buffer, 0, sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, &pLocal, &uLocalSize, &pRemote, &uRemoteSize);
 	std::string ClientIp = inet_ntoa(reinterpret_cast<sockaddr_in *>(pRemote)->sin_addr);
 	pSocketClient->SetClientIp(CCharacter::ASCIIToUnicode(ClientIp));
+	return TRUE;
 }
