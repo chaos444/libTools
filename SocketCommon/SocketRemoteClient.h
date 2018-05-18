@@ -82,6 +82,8 @@ namespace libTools
 		VOID	SetExistPostRecv(_In_ BOOL IsExistPostRecv);
 
 		VOID    SetKeepALive();
+
+		VOID	SetClientIp(_In_ CONST std::wstring& wsRemoteClientIp);
 	public:
 		enum { em_Buffer_Len = 1024 };
 	private:
@@ -95,6 +97,7 @@ namespace libTools
 		UINT			   _uRefCount;
 		BOOL			   _ExistPostRecv;
 		ULONGLONG		   _ulKeepALiveTick = NULL;
+		std::wstring       _wsClientIp;
 	protected:
 		bool			   _bExist;
 		bool			   _bLock;

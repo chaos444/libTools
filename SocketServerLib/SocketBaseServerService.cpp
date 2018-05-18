@@ -311,7 +311,7 @@ VOID libTools::CSocketBaseServerService::PostAccept()
 
 
 	::StartThreadpoolIo(_pServerTpIo);
-	if (AcceptEx(pSocketClient->GetSocket(), &pIoEvent->GetOverlapped()) == FALSE) // Wait to Client Connect to wake up 'IoCompletionCallback'
+	if (AcceptEx(pSocketClient, &pIoEvent->GetOverlapped()) == FALSE) // Wait to Client Connect to wake up 'IoCompletionCallback'
 	{
 		auto Error = ::WSAGetLastError();
 		if (Error != ERROR_IO_PENDING)
@@ -705,7 +705,7 @@ UINT_PTR libTools::CSocketBaseServerService::CreateClientSocket()
 	return INVALID_SOCKET;
 }
 
-BOOL libTools::CSocketBaseServerService::AcceptEx(_In_ UINT_PTR ClientSock, _In_ LPOVERLAPPED Overlapped)
+BOOL libTools::CSocketBaseServerService::AcceptEx(_In_ _Out_ CSocketRemoteClient* pSocketClient, _In_ LPOVERLAPPED Overlapped)
 {
 	static LPFN_ACCEPTEX _AcceptEx = nullptr;
 	if (_AcceptEx == nullptr)
@@ -718,7 +718,17 @@ BOOL libTools::CSocketBaseServerService::AcceptEx(_In_ UINT_PTR ClientSock, _In_
 			return FALSE;
 		}
 	}
+	
 
 	static BYTE Buffer[1024] = { 0 };
-	return _AcceptEx(_ServerSocket, ClientSock, &Buffer, 0, sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, NULL, Overlapped);
+	if (!_AcceptEx(_ServerSocket, pSocketClient->GetSocket(), &Buffer, 0, sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, NULL, Overlapped))
+		return FALSE;
+
+
+	sockaddr* pLocal = nullptr , *pRemote = nullptr;
+	INT 	  uLocalSize = 0,     uRemoteSize = 0;
+
+	::GetAcceptExSockaddrs(&Buffer, 0, sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, &pLocal, &uLocalSize, &pRemote, &uRemoteSize);
+	std::string ClientIp = inet_ntoa(reinterpret_cast<sockaddr_in *>(pRemote)->sin_addr);
+	pSocketClient->SetClientIp(CCharacter::ASCIIToUnicode(ClientIp));
 }

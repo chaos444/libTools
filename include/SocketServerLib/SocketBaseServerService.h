@@ -85,7 +85,7 @@ namespace libTools
 		UINT_PTR CreateClientSocket();
 
 		//
-		BOOL AcceptEx(_In_ UINT_PTR ClientSock, _In_ LPOVERLAPPED Overlapped);
+		BOOL AcceptEx(_In_ _Out_ CSocketRemoteClient* pSocketClient, _In_ LPOVERLAPPED Overlapped);
 
 	private:
 		/////Class Variable/////////////////////////////////////////////////////////////////////

@@ -24,6 +24,7 @@ namespace libTools
 		_ulCreateTick = ::GetTickCount64();
 
 		_ExistPostRecv = FALSE;
+		_wsClientIp = L"Empty";
 	}
 	VOID CSocketRemoteClient::SetTpIo(_In_ TP_IO* pTpIo)
 	{
@@ -156,6 +157,11 @@ namespace libTools
 	VOID CSocketRemoteClient::SetKeepALive()
 	{
 		_ulKeepALiveTick = ::GetTickCount64();
+	}
+
+	VOID CSocketRemoteClient::SetClientIp(_In_ CONST std::wstring& wsRemoteClientIp)
+	{
+		_wsClientIp = wsRemoteClientIp;
 	}
 
 }
