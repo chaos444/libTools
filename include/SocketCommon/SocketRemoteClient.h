@@ -83,7 +83,8 @@ namespace libTools
 
 		VOID    SetKeepALive();
 
-		VOID	SetClientIp(_In_ CONST std::wstring& wsRemoteClientIp);
+		CONST std::wstring& GetRemoteClientIp();
+
 	public:
 		enum { em_Buffer_Len = 1024 };
 	private:

@@ -101,7 +101,8 @@ VOID libTools::CLog::SetClientName(_In_ CONST std::wstring& cwsClientName, _In_ 
 {
 	if (!CDllInjector::IsRunAsAdministrator())
 	{
-		LOG_MSG_CF(L"Please Run as Administrator!");
+		LOG_MSG_CF(L"必须运行在管理员权限下!");
+		exit(0);
 		return;
 	}
 

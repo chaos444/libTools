@@ -26,7 +26,7 @@
 #endif // _DEBUG
 
 #pragma comment(lib,"Ws2_32.lib")
-#pragma comment(lib,"Mswsock.lib")
+
 
 #define _SELF L"SocketBaseServerService.cpp"
 libTools::CSocketBaseServerService::ServerThreadContent* libTools::CSocketBaseServerService::ServerThreadContent::Create(_In_ CSocketBaseServerService* pServer_, _In_ LPVOID Reserve_ /*= nullptr*/)
@@ -257,7 +257,7 @@ DWORD WINAPI libTools::CSocketBaseServerService::_ClearThread(_In_ LPVOID lpPara
 			{
 				// 是否被使用了(是否该socket被Client使用了)
 				CONST auto& itm = *itr;
-				if (!itm->IsOnLine() || itm->IsKeepALiveTimeout())
+				if (!itm->IsOnLine() || !itm->IsKeepALiveTimeout())
 					continue;
 
 				
@@ -713,16 +713,6 @@ BOOL libTools::CSocketBaseServerService::AcceptEx(_In_ _Out_ CSocketRemoteClient
 	}
 	
 
-	static BYTE Buffer[1024] = { 0 };
-	if (!_AcceptEx(_ServerSocket, pSocketClient->GetSocket(), &Buffer, 0, sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, NULL, Overlapped))
-		return FALSE;
-
-
-	sockaddr* pLocal = nullptr , *pRemote = nullptr;
-	INT 	  uLocalSize = 0,     uRemoteSize = 0;
-
-	::GetAcceptExSockaddrs(&Buffer, 0, sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, &pLocal, &uLocalSize, &pRemote, &uRemoteSize);
-	std::string ClientIp = inet_ntoa(reinterpret_cast<sockaddr_in *>(pRemote)->sin_addr);
-	pSocketClient->SetClientIp(CCharacter::ASCIIToUnicode(ClientIp));
-	return TRUE;
+	static BYTE Buffer[1024];
+	return _AcceptEx(_ServerSocket, pSocketClient->GetSocket(), Buffer, 0, sizeof(sockaddr_in) + 16, sizeof(sockaddr_in) + 16, NULL, Overlapped);
 }

@@ -1,5 +1,6 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <winsock2.h>
+#include <mswsock.h>	// GetAcceptExSockaddrs
 #include "SocketRemoteClient.h"
 #include <include/CharacterLib/Character.h>
 #include <include/ExceptionLib/Exception.h>
@@ -15,6 +16,7 @@
 
 #pragma comment(lib,"user32.lib")
 #pragma comment(lib,"Ws2_32.lib")
+#pragma comment(lib,"Mswsock.lib")
 namespace libTools
 {
 	CSocketRemoteClient::CSocketRemoteClient(_In_ UINT_PTR Sock) : _Socket(Sock), _pTpIo(nullptr), _uBufferSize(0), _uBufferMaxSize(0), _bExist(false), _bLock(false)
@@ -24,7 +26,6 @@ namespace libTools
 		_ulCreateTick = ::GetTickCount64();
 
 		_ExistPostRecv = FALSE;
-		_wsClientIp = L"Empty";
 	}
 	VOID CSocketRemoteClient::SetTpIo(_In_ TP_IO* pTpIo)
 	{
@@ -159,9 +160,18 @@ namespace libTools
 		_ulKeepALiveTick = ::GetTickCount64();
 	}
 
-	VOID CSocketRemoteClient::SetClientIp(_In_ CONST std::wstring& wsRemoteClientIp)
+	CONST std::wstring& CSocketRemoteClient::GetRemoteClientIp()
 	{
-		_wsClientIp = wsRemoteClientIp;
-	}
+		if (_wsClientIp.empty())
+		{
+			sockaddr RemoteAddr;
+			INT uRemoteSize = sizeof(sockaddr);
 
+
+			getpeername(_Socket, &RemoteAddr, &uRemoteSize);
+			std::string ClientIp = inet_ntoa(reinterpret_cast<sockaddr_in *>(&RemoteAddr)->sin_addr);
+			_wsClientIp = CCharacter::ASCIIToUnicode(ClientIp);
+		}
+		return _wsClientIp;
+	}
 }
