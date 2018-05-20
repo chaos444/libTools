@@ -75,6 +75,9 @@ namespace libTools
 		// 
 		std::shared_ptr<CHAR> GetBuffer(_Out_ UINT& uSize);
 
+		//
+		std::shared_ptr<CHAR> GetSizeBuffer(_In_ UINT uSize);
+
 		// Clear Data, Send
 		std::shared_ptr<CHAR> GetDataPtr(_Out_ UINT& uSize);
 

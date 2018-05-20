@@ -59,10 +59,10 @@ _hClearThread(NULL)
 
 libTools::CSocketBaseServerService::~CSocketBaseServerService()
 {
-	Stop();
+	StopServer();
 }
 
-BOOL libTools::CSocketBaseServerService::Run(_In_ SHORT shPort, _In_ UINT uMaxAccept)
+BOOL libTools::CSocketBaseServerService::RunServer(_In_ SHORT shPort, _In_ UINT uMaxAccept)
 {
 	WSADATA wd = { 0 };
 	WSAStartup(WINSOCK_VERSION, &wd);
@@ -77,7 +77,7 @@ BOOL libTools::CSocketBaseServerService::Run(_In_ SHORT shPort, _In_ UINT uMaxAc
 	if (_pClent_Tp_Ggoup == nullptr)
 	{
 		LOG_CF_E(L"CreateThreadpoolCleanupGroup = nullptr!");
-		Stop();
+		StopServer();
 		return FALSE;
 	}
 
@@ -88,7 +88,7 @@ BOOL libTools::CSocketBaseServerService::Run(_In_ SHORT shPort, _In_ UINT uMaxAc
 	if (!CreateServerSocket(shPort))
 	{
 		LOG_CF_E(L"CreateServerSocket = INVALID_SOCKET!");
-		Stop();
+		StopServer();
 		return FALSE;
 	}
 
@@ -102,7 +102,7 @@ BOOL libTools::CSocketBaseServerService::Run(_In_ SHORT shPort, _In_ UINT uMaxAc
 	if (_pServerTpIo == nullptr)
 	{
 		LOG_CF_E(L"CreateThreadpoolIo = nullptr!");
-		Stop();
+		StopServer();
 		return FALSE;
 	}
 
@@ -111,7 +111,7 @@ BOOL libTools::CSocketBaseServerService::Run(_In_ SHORT shPort, _In_ UINT uMaxAc
 	if (::listen(_ServerSocket, SOMAXCONN) == SOCKET_ERROR)
 	{
 		LOG_CF_E(L"listen = SOCKET_ERROR, Err=%d", ::WSAGetLastError());
-		Stop();
+		StopServer();
 		return FALSE;
 	}
 
@@ -125,7 +125,7 @@ BOOL libTools::CSocketBaseServerService::Run(_In_ SHORT shPort, _In_ UINT uMaxAc
 	return TRUE;
 }
 
-VOID libTools::CSocketBaseServerService::Stop()
+VOID libTools::CSocketBaseServerService::StopServer()
 {
 	_bRun = FALSE;
 
@@ -253,20 +253,12 @@ DWORD WINAPI libTools::CSocketBaseServerService::_ClearThread(_In_ LPVOID lpPara
 	{
 		pSocketBaseServerService->InvokeVecSocketClient([=] 
 		{
-			for (auto itr = pSocketBaseServerService->_VecSocketClient.begin(); itr != pSocketBaseServerService->_VecSocketClient.end();)
+			for (auto itr = pSocketBaseServerService->_VecSocketClient.begin(); itr != pSocketBaseServerService->_VecSocketClient.end(); itr++)
 			{
 				// 是否被使用了(是否该socket被Client使用了)
 				CONST auto& itm = *itr;
-				if (!itm->IsOnLine())
-				{
-					itr++;
+				if (!itm->IsOnLine() || itm->IsKeepALiveTimeout())
 					continue;
-				}
-				else if (!itm->IsKeepALiveTimeout())
-				{
-					itr++;
-					continue;
-				}
 
 				
 				itm->DisConnect();

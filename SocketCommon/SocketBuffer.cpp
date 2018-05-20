@@ -147,6 +147,14 @@ std::shared_ptr<CHAR> libTools::CSocketBuffer::GetBuffer(_Out_ UINT& uSize)
 	return DataPtr;
 }
 
+std::shared_ptr<CHAR> libTools::CSocketBuffer::GetSizeBuffer(_In_ UINT uSize)
+{
+	std::shared_ptr<CHAR> DataPtr(new CHAR[uSize], [](CHAR* lpAddr) { delete[] lpAddr; });
+	memcpy(DataPtr.get(), _Data.data(), uSize);
+	_Data.erase(_Data.begin(), _Data.begin() + uSize);
+	return DataPtr;
+}
+
 std::shared_ptr<CHAR> libTools::CSocketBuffer::GetDataPtr(_Out_ UINT& uSize)
 {
 	uSize = static_cast<UINT>(_Data.size()) + 4;

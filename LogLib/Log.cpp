@@ -350,7 +350,7 @@ VOID libTools::CLog::SendLogToForm(_In_ CONST LogContent& Content) CONST
 			Content.wsContent.c_str(),
 			_wsClientName.c_str());
 
-		std::shared_ptr<WCHAR> wsTextPtr(new WCHAR[wsText.length()], [](WCHAR* p) { delete[] p; });
+		std::shared_ptr<WCHAR> wsTextPtr(new WCHAR[wsText.length() + 1], [](WCHAR* p) { delete[] p; });
 		CCharacter::strcpy_my(wsTextPtr.get(), wsText.c_str());
 
 		COPYDATASTRUCT cd = { 0 };

@@ -33,10 +33,9 @@ namespace libTools
 		CSocketBaseServerService();
 		~CSocketBaseServerService();
 
-		BOOL Run(_In_ SHORT shPort, _In_ UINT uMaxAccept);
+		virtual BOOL Run(_In_ SHORT shPort, _In_ UINT uMaxAccept) = NULL;
 
-		VOID Stop();
-
+		virtual VOID Stop() = NULL;
 	private:
 		//////static ////////////////////////////////////////////////////////////////////
 
@@ -45,6 +44,10 @@ namespace libTools
 
 		static DWORD WINAPI  _ClearThread(_In_ LPVOID lpParam);
 	protected:
+		BOOL RunServer(_In_ SHORT shPort, _In_ UINT uMaxAccept);
+
+		VOID StopServer();
+
 		/////IOCP Action/////////////////////////////////////////////////////////////////////
 		VOID PostAccept();
 

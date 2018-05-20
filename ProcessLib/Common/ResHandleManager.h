@@ -5,7 +5,7 @@
 
 namespace libTools
 {
-#define SetResDeleter(VarName, Deleter) CResManager<decltype(VarName),std::function<VOID(decltype(VarName)&)>> VarName##Manager(VarName,Deleter)
+#define SetResDeleter(VarName, Deleter) libTools::CResManager<decltype(VarName),std::function<VOID(decltype(VarName)&)>> VarName##Manager(VarName,Deleter)
 
 	template<typename ResHandle, typename Deleter>
 	class CResManager
