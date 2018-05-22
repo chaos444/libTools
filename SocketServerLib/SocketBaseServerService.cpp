@@ -189,6 +189,7 @@ VOID CALLBACK libTools::CSocketBaseServerService::IoCompletionCallback(PTP_CALLB
 			switch (IoResult)
 			{
 			case ERROR_NETNAME_DELETED: // Client Close Socket~
+				LOG_C_D(L"ERROR_NETNAME_DELETED");
 				pSocketBaseServerService->OnClose(pIoEvent->GetSocketClient());
 				break;
 			case ERROR_SEM_TIMEOUT:
@@ -257,11 +258,11 @@ DWORD WINAPI libTools::CSocketBaseServerService::_ClearThread(_In_ LPVOID lpPara
 			{
 				// 是否被使用了(是否该socket被Client使用了)
 				CONST auto& itm = *itr;
-				if (!itm->IsOnLine() || !itm->IsKeepALiveTimeout())
-					continue;
-
-				
-				itm->DisConnect();
+				if (itm->IsOnLine() && itm->IsKeepALiveTimeout())
+				{
+					LOG_C_E(L"Timeout ->  DisConnect");
+					itm->DisConnect();
+				}
 			}
 		});
 		::Sleep(1000);
@@ -540,6 +541,7 @@ VOID libTools::CSocketBaseServerService::OnSend(_In_ CSocketIoEvent* pSocketIoEv
 
 VOID libTools::CSocketBaseServerService::OnClose(_In_ CSocketRemoteClient* pSocketClient)
 {
+	LOG_C_D(L"CSocketBaseServerService::OnClose");
 	CException::InvokeAction(__FUNCTIONW__, [pSocketClient, this]
 	{
 		if (pSocketClient->GetRefCount() == 0)
@@ -602,6 +604,7 @@ VOID libTools::CSocketBaseServerService::AddClient(_In_ CSocketRemoteClient* pSo
 	{
 		pSocketClient->SetTpIo(pTpIo);
 		pSocketClient->Add();
+		pSocketClient->BeginOnLine();
 		PostRecv(pSocketClient);
 	}
 }

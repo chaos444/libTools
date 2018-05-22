@@ -93,6 +93,8 @@ namespace libTools
 		UINT SaveLogSize();
 
 		VOID Clear();
+
+		VOID SetExceptionPtrToLog();
 	private:
 		VOID SaveLog(_In_ CONST std::wstring& wsContent, _In_ BOOL bAppend);
 

@@ -313,6 +313,14 @@ VOID libTools::CLog::Clear()
 	_QueueSaveLogContent.clear();
 }
 
+VOID libTools::CLog::SetExceptionPtrToLog()
+{
+	libTools::g_EchoExceptionMsgPtr = [](_In_ CONST std::wstring& wsErrText)
+	{
+		LOG_MSG_CF(L"Method Exception [%s]", wsErrText.c_str());
+	};
+}
+
 std::wstring libTools::CLog::FormatLogContent(_In_ CONST LogContent& Content) CONST
 {
 	return CCharacter::MakeFormatText(L"#Stack:\r\n  #Time:%02d:%02d:%02d  #Client:%s	#Level:%d #File:%s	#FunName:%s Line:%d	#Content:%s\r\n",

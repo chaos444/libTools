@@ -42,6 +42,21 @@ namespace libTools
 		return _Socket;
 	}
 
+	VOID CSocketRemoteClient::Remove()
+	{
+
+	}
+
+	VOID CSocketRemoteClient::Add()
+	{
+
+	}
+
+	BOOL CSocketRemoteClient::IsOnLine() CONST
+	{
+		return _bExist;
+	}
+
 	BOOL CSocketRemoteClient::InExist() CONST
 	{
 		return _bExist;
@@ -49,7 +64,7 @@ namespace libTools
 
 	BOOL CSocketRemoteClient::IsKeepALiveTimeout() CONST
 	{
-		return _ulKeepALiveTick == NULL || ::GetTickCount64() - _ulKeepALiveTick >= 60 * 1000;
+		return _ulKeepALiveTick != NULL && ::GetTickCount64() - _ulKeepALiveTick >= 60 * 1000;
 	}
 
 	VOID CSocketRemoteClient::SetBuffer(_In_ CONST CHAR* Buffer, _In_ UINT uLen)
@@ -174,4 +189,11 @@ namespace libTools
 		}
 		return _wsClientIp;
 	}
+
+	VOID CSocketRemoteClient::BeginOnLine()
+	{
+		_bExist = true;
+		_ulKeepALiveTick = ::GetTickCount64();
+	}
+
 }

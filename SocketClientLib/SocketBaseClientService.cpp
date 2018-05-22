@@ -183,6 +183,7 @@ VOID libTools::CSocketBaseClientService::OnConnect()
 
 VOID libTools::CSocketBaseClientService::OnClose()
 {
+	LOG_C_D(L"CSocketBaseClientService::OnClose");
 	Stop();
 	DisConnectServer();
 }
@@ -394,6 +395,7 @@ BOOL libTools::CSocketBaseClientService::PostSend(_In_ CSocketBuffer& SocketBuff
 	UINT uSize = 0;
 	std::shared_ptr<CHAR> DataPtr = SocketBuffer.GetDataPtr(uSize);
 
+
 	SocketSendBuffer* pSendBuffer = new SocketSendBuffer();
 	if (pSendBuffer == nullptr)
 	{
@@ -401,6 +403,7 @@ BOOL libTools::CSocketBaseClientService::PostSend(_In_ CSocketBuffer& SocketBuff
 		OnClose();
 		return FALSE;
 	}
+
 
 	pSendBuffer->Buffer = new CHAR[uSize];
 	pSendBuffer->uMaxLength = uSize;
@@ -412,8 +415,8 @@ BOOL libTools::CSocketBaseClientService::PostSend(_In_ CSocketBuffer& SocketBuff
 		return FALSE;
 	}
 
-	memcpy(pSendBuffer->Buffer, DataPtr.get(), uSize);
 
+	memcpy(pSendBuffer->Buffer, DataPtr.get(), uSize);
 	PostRecv();
 	return PostSend(pSendBuffer);
 }

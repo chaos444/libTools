@@ -24,13 +24,13 @@ namespace libTools
 		UINT_PTR  GetSocket();
 
 		//      被删除的时候会在线程池中调用该函数, 可以考虑用在处理掉线的时候
-		virtual VOID Remove() = NULL;
+		virtual VOID Remove();
 
 		//      被添加的时候调用的函数
-		virtual VOID Add() = NULL;
+		virtual VOID Add();
 
 		// 是否在线
-		virtual BOOL IsOnLine() CONST = NULL;
+		virtual BOOL IsOnLine() CONST;
 
 		// 这个socket是否被使用
 		virtual BOOL InExist() CONST;
@@ -85,6 +85,7 @@ namespace libTools
 
 		CONST std::wstring& GetRemoteClientIp();
 
+		VOID    BeginOnLine();
 	public:
 		enum { em_Buffer_Len = 1024 };
 	private:

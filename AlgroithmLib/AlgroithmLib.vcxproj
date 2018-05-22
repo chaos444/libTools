@@ -108,6 +108,7 @@ xcopy "$(SolutionDir)$(Configuration)\$(TargetFileName)"  "$(SolutionDir)lib\" /
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <PostBuildEvent>
       <Command>if not exist "$(SolutionDir)include\$(ProjectName)" mkdir "$(SolutionDir)include\$(ProjectName)"
