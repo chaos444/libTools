@@ -29,3 +29,10 @@ void libTools::CThreadLock::UnLock()
 {
 	::LeaveCriticalSection(&_Lock);
 }
+
+VOID libTools::ILock::DoActionInLock(_In_ std::function<VOID(VOID)> Ptr)
+{
+	Lock();
+	Ptr();
+	UnLock();
+}

@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 #include <mutex>
+#include <functional>
 
 namespace libTools
 {
@@ -14,6 +15,18 @@ namespace libTools
 
 		virtual void Lock() = 0;
 		virtual void UnLock() = 0;
+
+
+		virtual VOID DoActionInLock(_In_ std::function<VOID(VOID)> Ptr);
+
+		template<typename T>
+		T DoActionReturnInLock(_In_ std::function<T(VOID)> Ptr)
+		{
+			Lock();
+			T bResult = Ptr();
+			UnLock();
+			return bResult;
+		}
 	private:
 
 	};
