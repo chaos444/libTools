@@ -4,7 +4,7 @@
 
 #ifdef _DEBUG
 #pragma comment(lib,"FileLib_Debug.lib")
-#pragma comment(lib,"HookLib_Debug.lib")
+#pragma comment(lib,"HookLib_Debug.lib") 
 #else
 #pragma comment(lib,"FileLib.lib")
 #pragma comment(lib,"HookLib.lib")
