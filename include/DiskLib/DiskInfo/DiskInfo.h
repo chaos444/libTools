@@ -57,6 +57,10 @@ namespace libTools
 
 		//
 		static BOOL GetPhysicalDiskNumber(_In_ WCHAR wchDisk, _Out_ std::wstring& wsPhysicalDiskNumber);
+
+
+		// 
+		static BOOL IsBasicDisk(_In_ WCHAR wchDisk);
 	private:
 		template<typename T>
 		static VOID FormatDiskSerialNumber(_In_ T* pszSeralNumber)

@@ -162,6 +162,11 @@ BOOL libTools::CDiskInfo::GetPhysicalDiskNumber(_In_ WCHAR wchDisk, _Out_ DWORD&
 	return FALSE;
 }
 
+BOOL libTools::CDiskInfo::IsBasicDisk(_In_ WCHAR wchDisk)
+{
+	return ::GetDriveTypeW(libTools::CCharacter::MakeFormatText(L"%c:\\", wchDisk).c_str()) != DRIVE_FIXED;
+}
+
 std::wstring libTools::CDiskInfo::FormatPhysicalDiskNumber(_In_ DWORD dwDeviceNumber)
 {
 	return libTools::CCharacter::MakeFormatText(L"\\\\.\\PhysicalDrive%d", dwDeviceNumber);
