@@ -1,4 +1,5 @@
 #include "DiskInfo.h"
+#include <filesystem>
 #include <devioctl.h>
 #include <ntdddisk.h>
 #define _NTSCSI_USER_MODE_
@@ -165,6 +166,17 @@ BOOL libTools::CDiskInfo::GetPhysicalDiskNumber(_In_ WCHAR wchDisk, _Out_ DWORD&
 BOOL libTools::CDiskInfo::IsBasicDisk(_In_ WCHAR wchDisk)
 {
 	return ::GetDriveTypeW(libTools::CCharacter::MakeFormatText(L"%c:\\", wchDisk).c_str()) == DRIVE_FIXED;
+}
+
+UINT libTools::CDiskInfo::GetDiskSize(_In_ WCHAR wchDisk)
+{
+	std::wstring wsPath = L"";
+	wsPath.append(1, wchDisk);
+
+
+	std::experimental::filesystem::v1::path GameDisk(wsPath);
+	auto uMaxSpace = std::experimental::filesystem::v1::space(GameDisk).capacity;
+	return static_cast<UINT>(uMaxSpace / 1024 / 1024 / 1024);
 }
 
 std::wstring libTools::CDiskInfo::FormatPhysicalDiskNumber(_In_ DWORD dwDeviceNumber)

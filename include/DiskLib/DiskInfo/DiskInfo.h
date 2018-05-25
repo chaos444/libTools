@@ -61,6 +61,9 @@ namespace libTools
 
 		// 
 		static BOOL IsBasicDisk(_In_ WCHAR wchDisk);
+
+		// Value/GB
+		static UINT GetDiskSize(_In_ WCHAR whcDisk);
 	private:
 		template<typename T>
 		static VOID FormatDiskSerialNumber(_In_ T* pszSeralNumber)
