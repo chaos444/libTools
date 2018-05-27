@@ -190,6 +190,21 @@ namespace libTools
 			GetSplit_By_List(wsText, vSplit, vSplitContent, emOption);
 		}
 
+		template<typename T>
+		static std::basic_string<T> Replace(_In_ CONST std::basic_string<T>& Text, _In_ CONST std::basic_string<T>& FromText, _In_ CONST std::basic_string<T>& ToText)
+		{
+			std::size_t Pos				= 0;
+			std::basic_string<T> Result = Text;
+
+
+			while ((Pos = Result.find(FromText, Pos)) != std::basic_string<T>::npos)
+			{
+				Result.replace(Pos, FromText.length(), ToText);
+				Pos += ToText.length();
+			}
+			return Result;
+		}
+
 		static std::wstring MakeFormatText(_In_ LPCWSTR pwszFormat, ...);
 
 		template<typename T>
