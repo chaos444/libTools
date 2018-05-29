@@ -8,6 +8,14 @@
 
 namespace libTools
 {
+	// struct support SocketBuffer operator
+	struct BaseSocketBuffer
+	{
+		virtual BaseSocketBuffer& operator << (libTools::CSocketBuffer& SocketBuffer) = NULL;
+		virtual BaseSocketBuffer& operator >> (libTools::CSocketBuffer& SocketBuffer) = NULL;
+	};
+
+
 	class CSocketBuffer
 	{
 	public:
