@@ -99,7 +99,9 @@
 xcopy "$(ProjectDir)AntiRootkit\AntiRootkit.h" "$(SolutionDir)include\$(ProjectName)\AntiRootkit\" /Y
 xcopy "$(ProjectDir)Memory\Memory.h" "$(SolutionDir)include\$(ProjectName)\Memory\" /Y
 xcopy "$(ProjectDir)Memory\SearchBinary.h" "$(SolutionDir)include\$(ProjectName)\Memory\" /Y
+xcopy "$(ProjectDir)Memory\ProcessSearchBinary.h" "$(SolutionDir)include\$(ProjectName)\Memory\" /Y
 xcopy "$(ProjectDir)Process\Process.h" "$(SolutionDir)include\$(ProjectName)\Process\" /Y
+xcopy "$(ProjectDir)Process\ProcessModule.h" "$(SolutionDir)include\$(ProjectName)\Process\" /Y
 xcopy "$(ProjectDir)Thread\Thread.h" "$(SolutionDir)include\$(ProjectName)\Thread\" /Y
 xcopy "$(ProjectDir)KeyboardMsg\KeyboardMsg.h" "$(SolutionDir)include\$(ProjectName)\KeyboardMsg\" /Y
 xcopy "$(ProjectDir)Common\ResHandleManager.h" "$(SolutionDir)include\$(ProjectName)\Common\" /Y
@@ -121,7 +123,9 @@ xcopy "$(SolutionDir)$(Configuration)\$(TargetFileName)"  "$(SolutionDir)lib\" /
 xcopy "$(ProjectDir)AntiRootkit\AntiRootkit.h" "$(SolutionDir)include\$(ProjectName)\AntiRootkit\" /Y
 xcopy "$(ProjectDir)Memory\Memory.h" "$(SolutionDir)include\$(ProjectName)\Memory\" /Y
 xcopy "$(ProjectDir)Memory\SearchBinary.h" "$(SolutionDir)include\$(ProjectName)\Memory\" /Y
+xcopy "$(ProjectDir)Memory\ProcessSearchBinary.h" "$(SolutionDir)include\$(ProjectName)\Memory\" /Y
 xcopy "$(ProjectDir)Process\Process.h" "$(SolutionDir)include\$(ProjectName)\Process\" /Y
+xcopy "$(ProjectDir)Process\ProcessModule.h" "$(SolutionDir)include\$(ProjectName)\Process\" /Y
 xcopy "$(ProjectDir)Thread\Thread.h" "$(SolutionDir)include\$(ProjectName)\Thread\" /Y
 xcopy "$(ProjectDir)KeyboardMsg\KeyboardMsg.h" "$(SolutionDir)include\$(ProjectName)\KeyboardMsg\" /Y
 xcopy "$(ProjectDir)Common\ResHandleManager.h" "$(SolutionDir)include\$(ProjectName)\Common\" /Y
@@ -154,8 +158,10 @@ xcopy "$(SolutionDir)$(Configuration)\$(TargetFileName)"  "$(SolutionDir)lib\" /
     <ClCompile Include="KeyboardMsg\KeyboardMsg.cpp" />
     <ClCompile Include="Lock\Lock.cpp" />
     <ClCompile Include="Memory\Memory.cpp" />
+    <ClCompile Include="Memory\ProcessSearchBinary.cpp" />
     <ClCompile Include="Memory\SearchBinary.cpp" />
     <ClCompile Include="Process\Process.cpp" />
+    <ClCompile Include="Process\ProcessModule.cpp" />
     <ClCompile Include="Thread\Thread.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -164,8 +170,10 @@ xcopy "$(SolutionDir)$(Configuration)\$(TargetFileName)"  "$(SolutionDir)lib\" /
     <ClInclude Include="KeyboardMsg\KeyboardMsg.h" />
     <ClInclude Include="Lock\Lock.h" />
     <ClInclude Include="Memory\Memory.h" />
+    <ClInclude Include="Memory\ProcessSearchBinary.h" />
     <ClInclude Include="Memory\SearchBinary.h" />
     <ClInclude Include="Process\Process.h" />
+    <ClInclude Include="Process\ProcessModule.h" />
     <ClInclude Include="Thread\Thread.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

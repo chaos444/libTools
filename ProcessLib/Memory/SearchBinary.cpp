@@ -87,7 +87,6 @@ DWORD libTools::CSearchBinary::FindBase_ByCALL(_In_ LPCSTR lpszCode, _In_ int nO
 UINT libTools::CSearchBinary::FindAddr(_In_ LPCSTR lpszCode, _In_ int nOffset, _In_ LPCWSTR lpszModule, _Out_ std::vector<DWORD>& Vec)
 {
 	std::vector<DWORD>  VecAddr;
-	DWORD				dwAddr = 0x0;
 
 
 	//¿ªÊ¼ËÑË÷»ùÖ·
@@ -95,8 +94,7 @@ UINT libTools::CSearchBinary::FindAddr(_In_ LPCSTR lpszCode, _In_ int nOffset, _
 	{
 		for (auto& itm : VecAddr)
 		{
-			dwAddr = nOffset >= 0 ? itm - abs(nOffset) : itm + abs(nOffset);
-			Vec.push_back(itm);
+			Vec.push_back(nOffset >= 0 ? itm - abs(nOffset) : itm + abs(nOffset));
 		}
 	}
 
