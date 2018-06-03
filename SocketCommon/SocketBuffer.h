@@ -9,10 +9,12 @@
 namespace libTools
 {
 	// struct support SocketBuffer operator
+	template<typename T>
 	struct BaseSocketBuffer
 	{
-		virtual BaseSocketBuffer& operator << (libTools::CSocketBuffer& SocketBuffer) = NULL;
-		virtual BaseSocketBuffer& operator >> (libTools::CSocketBuffer& SocketBuffer) = NULL;
+		virtual BaseSocketBuffer& operator << (T& SocketBuffer) = NULL;
+
+		virtual CONST BaseSocketBuffer& operator >> (T& SocketBuffer) CONST = NULL;
 	};
 
 
@@ -122,6 +124,20 @@ namespace libTools
 
 		VOID clear();
 
+
+		template<typename T>
+		VOID AddStruct(CONST T& itm)
+		{
+			itm >> *this;
+		}
+
+		template<typename T>
+		T GetStruct()
+		{
+			T Instance;
+			Instance << *this;
+			return Instance;
+		}
 	private:
 
 		VOID AddVerData();
