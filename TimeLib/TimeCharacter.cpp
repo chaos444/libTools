@@ -135,10 +135,20 @@ VOID libTools::CTimeCharacter::FormatTime(_In_ ULONGLONG ulResult, _Out_opt_ std
 	wsText = CCharacter::MakeFormatText(L"%I64dDay %I64dHour %I64dMin %I64dSec", ulDay, ulHour, ulMin, ulSecond);
 }
 
-VOID libTools::CTimeCharacter::FormatTime(_Out_ std::wstring& wsText)
+VOID libTools::CTimeCharacter::FormatTime(_In_ em_FormatType emType, _Out_ std::wstring& wsText)
 {
 	SYSTEMTIME SysTime = { 0 };
 	::GetLocalTime(&SysTime);
 
-	wsText = CCharacter::MakeFormatText(L"%d-%d-%d %d:%d:%d", SysTime.wYear, SysTime.wMonth, SysTime.wDay, SysTime.wHour, SysTime.wMinute, SysTime.wSecond);
+	switch (emType)
+	{
+	case libTools::CTimeCharacter::em_FormatType::Chinese:
+		wsText = CCharacter::MakeFormatText(L"%dƒÍ%d‘¬%d»’ %d:%d:%d", SysTime.wYear, SysTime.wMonth, SysTime.wDay, SysTime.wHour, SysTime.wMinute, SysTime.wSecond);
+		break;
+	case libTools::CTimeCharacter::em_FormatType::English:
+		wsText = CCharacter::MakeFormatText(L"%d-%d-%d %d:%d:%d", SysTime.wYear, SysTime.wMonth, SysTime.wDay, SysTime.wHour, SysTime.wMinute, SysTime.wSecond);
+		break;
+	default:
+		break;
+	}
 }

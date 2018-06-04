@@ -37,6 +37,12 @@ namespace libTools
 
 			bool operator != (_In_ CONST TimeContent& Content) CONST;
 		};
+
+		enum class em_FormatType
+		{
+			Chinese,
+			English
+		};
 	public:
 		CTimeCharacter() = default;
 		~CTimeCharacter() = default;
@@ -54,7 +60,7 @@ namespace libTools
 		static VOID FormatTime(_In_ ULONGLONG ulResult, _Out_opt_ std::wstring& wsText);
 
 		//
-		static VOID FormatTime(_Out_ std::wstring& wsText);
+		static VOID FormatTime(_In_ em_FormatType emType, _Out_ std::wstring& wsText);
 	private:
 
 	};
