@@ -55,6 +55,11 @@ namespace libTools
 		virtual void Lock() override;
 
 		virtual void UnLock() override;
+
+		// support std::lock_guard
+		void lock();
+
+		void unlock();
 	private:
 		CRITICAL_SECTION _Lock;
 	};
