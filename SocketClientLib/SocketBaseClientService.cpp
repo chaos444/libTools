@@ -178,7 +178,7 @@ BOOL libTools::CSocketBaseClientService::PostConnect()
 VOID libTools::CSocketBaseClientService::OnConnect()
 {
 	_bConnect = TRUE;
-	LOG_CF_D(L"成功连接上服务器!");
+	LOG_C_D(L"成功连接上服务器!");
 }
 
 VOID libTools::CSocketBaseClientService::OnClose()

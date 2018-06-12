@@ -74,6 +74,65 @@ BOOL libTools::CBaseDbManager::ExcuteSQL(_In_ CONST std::wstring wsSQL, _In_ UIN
 	});
 }
 
+BOOL libTools::CBaseDbManager::ExcuteSQL(_In_ CONST std::wstring wsSQL, _Out_ std::vector<Table>& VecResult) CONST
+{
+	std::lock_guard<std::mutex> Lock_(_Mtx);
+	return CException::InvokeFunc<BOOL>(__FUNCTIONW__, [&]
+	{
+		SQLEnvParam Env;
+		VecResult.clear();
+
+		if (!InitializeSQLEnv(Env))
+		{
+			FreeMem(Env);
+			return FALSE;
+		}
+
+		auto Ret = SQLAllocHandle(SQL_HANDLE_STMT, Env.hDbc, &Env.hStmt);
+		if (Ret != SQL_SUCCESS)
+		{
+			LOG_CF_E(L"SQLAllocHandle(SQL_HANDLE_STMT) Faild, Err=%d", Ret);
+			FreeMem(Env);
+			return FALSE;
+		}
+
+		std::shared_ptr<WCHAR> Buffer(new WCHAR[wsSQL.length() + 1], [](WCHAR* p) { delete[] p; });
+		CCharacter::strcpy_my(Buffer.get(), wsSQL.c_str());
+
+		Ret = SQLExecDirectW(Env.hStmt, Buffer.get(), static_cast<SQLINTEGER>(wsSQL.length()));
+		if (Ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_CF_E(L"SQLExecDirectW = SQL_SUCCESS_WITH_INFO");
+			PrintSQLErrText(SQL_HANDLE_STMT, Env.hStmt);
+		}
+		else if (Ret != SQL_SUCCESS)
+		{
+			LOG_CF_E(L"SQLExecDirectW Faild. Ret=%d,SQL=%s", Ret, wsSQL.c_str());
+			FreeMem(Env);
+			return FALSE;
+		}
+
+
+		while (::SQLFetch(Env.hStmt) == SQL_SUCCESS)
+		{
+			Table Table_;
+			for(UINT i = 0;; ++i)
+			{
+				CONST static UINT uMaxTextSize = 128;
+				WCHAR Text[uMaxTextSize] = { 0 };
+				if (::SQLGetData(Env.hStmt, static_cast<SQLSMALLINT>(i + 1), SQL_C_WCHAR, Text, uMaxTextSize, NULL) != SQL_SUCCESS)
+					break;
+
+				Table_.push_back(Text);
+			}
+			VecResult.push_back(Table_);
+		}
+
+		FreeMem(Env);
+		return TRUE;
+	});
+}
+
 BOOL libTools::CBaseDbManager::ExcuteSQL_SingleResult(_In_ CONST std::wstring& wsSQL, _Out_ std::wstring& wsResultText) CONST
 {
 	return CException::InvokeFunc<BOOL>(__FUNCTIONW__, [&]

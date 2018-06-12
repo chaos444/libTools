@@ -28,6 +28,9 @@ namespace libTools
 		BOOL ExcuteSQL(_In_ CONST std::wstring wsSQL, _In_ UINT uResultCount, _Out_ std::vector<Table>& VecResult) CONST;
 
 		// 
+		BOOL ExcuteSQL(_In_ CONST std::wstring wsSQL, _Out_ std::vector<Table>& VecResult) CONST;
+
+		// 
 		BOOL ExcuteSQL_SingleResult(_In_ CONST std::wstring& wsSQL, _Out_ std::wstring& wsResultText) CONST;
 
 		//
