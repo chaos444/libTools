@@ -36,7 +36,7 @@ libTools::CSocketBaseClientService::CSocketBaseClientService() :_ServerSocket(IN
 
 libTools::CSocketBaseClientService::~CSocketBaseClientService()
 {
-
+	Stop();
 }
 
 BOOL libTools::CSocketBaseClientService::Run(_In_ CONST std::wstring& wsIp, _In_ SHORT Port, _In_ DWORD dwMaxTimeout)

@@ -167,12 +167,12 @@ VOID libTools::CSocketBaseServerService::StopServer()
 		::WaitForSingleObject(_hClearThread, INFINITE);
 		::CloseHandle(_hClearThread);
 		_hClearThread = NULL;
+
+
+		::DeleteCriticalSection(&_VecSocketClientLock);
+		WSACleanup();
+		LOG_CF_D(L"Release 所有客户端!");
 	}
-
-	::DeleteCriticalSection(&_VecSocketClientLock);
-
-	WSACleanup();
-	LOG_CF_D(L"Release 所有客户端!");
 }
 
 VOID CALLBACK libTools::CSocketBaseServerService::IoCompletionCallback(PTP_CALLBACK_INSTANCE , PVOID Context, PVOID Overlapped, ULONG IoResult, ULONG_PTR NumberOfBytesTransferred, PTP_IO )
