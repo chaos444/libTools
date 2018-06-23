@@ -127,7 +127,7 @@ namespace libTools
 				return FALSE;
 
 			FILE* pFile = nullptr;
-			_wfopen_s(&pFile, wsPath.c_str(), L"a+");
+			_wfopen_s(&pFile, wsPath.c_str(), L"w+");
 			if (pFile == nullptr)
 			{
 				::MessageBoxW(NULL, CCharacter::MakeFormatText(L"WriteASCIIFile Fiald! Path:%s", wsPath.c_str()).c_str(), L"Error", NULL);
