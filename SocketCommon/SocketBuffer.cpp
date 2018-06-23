@@ -150,6 +150,12 @@ std::shared_ptr<CHAR> libTools::CSocketBuffer::GetBuffer(_Out_ UINT& uSize)
 std::shared_ptr<CHAR> libTools::CSocketBuffer::GetSizeBuffer(_In_ UINT uSize)
 {
 	std::shared_ptr<CHAR> DataPtr(new CHAR[uSize], [](CHAR* lpAddr) { delete[] lpAddr; });
+	if (_Data.size() < uSize)
+	{
+		MessageBoxW(NULL, libTools::CCharacter::MakeFormatText(L"_Data.size=[%d] < uSize[%d]", _Data.size(), uSize).c_str(), L"libTools::CSocketBuffer::GetSizeBuffer", NULL);
+		return DataPtr;
+	}
+	
 	memcpy(DataPtr.get(), _Data.data(), uSize);
 	_Data.erase(_Data.begin(), _Data.begin() + uSize);
 	return DataPtr;
