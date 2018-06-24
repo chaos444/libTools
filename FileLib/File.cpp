@@ -353,4 +353,17 @@ namespace libTools
 
 		return dwType & FILE_ATTRIBUTE_DIRECTORY ? TRUE : FALSE;
 	}
+
+	BOOL WINAPI CFile::ForceDeleteFile(_In_ CONST std::wstring& wsPath)
+	{
+		//DWORD dwFileAttribute = ::GetFileAttributesW(wsPath.c_str());
+		//dwFileAttribute = dwFileAttribute & ~FILE_ATTRIBUTE_READONLY & ~FILE_ATTRIBUTE_HIDDEN;
+		if (FileExist(wsPath))
+		{
+			::SetFileAttributesW(wsPath.c_str(), FILE_ATTRIBUTE_NORMAL);
+			return ::DeleteFileW(wsPath.c_str());
+		}
+		return TRUE;
+	}
+
 }

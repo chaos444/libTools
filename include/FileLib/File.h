@@ -60,6 +60,9 @@ namespace libTools
 
 		// Directory is Exist
 		static BOOL WINAPI DirectoryExist(_In_ CONST std::wstring& wsPath);
+
+		// Remove File (Remove File Some Attribute)
+		static BOOL WINAPI ForceDeleteFile(_In_ CONST std::wstring& wsPath);
 	};
 
 }
