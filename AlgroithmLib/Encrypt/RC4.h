@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <vector>
 #include <string>
+#include <memory>
 
 namespace libTools
 {
@@ -28,13 +29,13 @@ namespace libTools
 	class CRC4 
 	{
 	public:
-		CRC4(_In_ CONST std::string& pszKey);
+		CRC4(_In_ CONST CHAR* pszKeyText, _In_ UINT uKeyLength);
 
 		// 获取密钥流(明文长度,加密流), 这是调用解密函数之前调用的
-		void GetKeyStream(_In_ UINT uEnctypTextLength, _Out_ std::string& puszKeyStream);
+		std::shared_ptr<CHAR> GetKeyStream(_In_ UINT uEnctypTextLength);
 
-		// 获取加密文本
-		void GetEncryptText(_In_ CONST std::string& strPlainText, _Out_ std::string& pszEnrypText);
+		// 获取加密文本(明文,明文长度)
+		std::shared_ptr<CHAR> GetEncryptText(_In_ CONST CHAR* pszPlanText, _In_ UINT uLength);
 	private:
 		// 初始化状态向量S和临时向量T，供keyStream方法调用
 		void Initial();
@@ -65,7 +66,7 @@ namespace libTools
 		~CRC4_Decryption() = default;
 
 		// 加密文本,加密的密钥流, 加密长度(加密文本和密钥流的长度是一样的), 返回解密的文本
-		static void DecryptText(_In_ CONST std::string& pszEnctryText, _In_ CONST std::string& pszKey, _Out_ std::string& pszDecrypText);
+		static std::shared_ptr<CHAR> DecryptText(_In_ CONST CHAR* pszEnctryText, _In_ UINT uEncryptLength, _In_ CONST CHAR* pszKeyStream);
 	};
 }
 

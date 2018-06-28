@@ -1,36 +1,38 @@
 #include "RC4.h"
 #include <algorithm>
 
-libTools::CRC4::CRC4(_In_ CONST std::string& pszKey)
+libTools::CRC4::CRC4(_In_ CONST CHAR* pszKeyText, _In_ UINT uKeyLength)
 {
-	_uKeyLen = pszKey.length();
+	_uKeyLen = uKeyLength;
 
 	K.reserve(_uKeyLen);
 	for (UINT i = 0; i < _uKeyLen; ++i)
-		K.push_back(pszKey[i]);
+		K.push_back(pszKeyText[i]);
 }
 
-void libTools::CRC4::GetKeyStream(_In_ UINT uEnctypTextLength, _Out_ std::string& puszKeyStream)
+std::shared_ptr<CHAR> libTools::CRC4::GetKeyStream(_In_ UINT uEnctypTextLength)
 {
 	keyStream(uEnctypTextLength);
 
-	puszKeyStream.reserve(uEnctypTextLength + 1);
-	for (CONST auto& itm : k)
+	std::shared_ptr<CHAR> pszKeyStream(new CHAR[uEnctypTextLength], [](CHAR * p) {delete[] p; });
+	for (UINT i = 0;i < k.size(); ++i)
 	{
-		puszKeyStream.push_back(itm);
+		pszKeyStream.get()[i] = k[i];
 	}
+	return pszKeyStream;
 }
 
-void libTools::CRC4::GetEncryptText(_In_ CONST std::string& strPlainText, _Out_ std::string& pszEnrypText)
+std::shared_ptr<CHAR> libTools::CRC4::GetEncryptText(_In_ CONST CHAR* pszPlanText, _In_ UINT uLength)
 {
-	UINT uTextLength = strPlainText.length();
-	keyStream(uTextLength);
+	keyStream(uLength);
 
-	pszEnrypText.reserve(uTextLength);
-	for (UINT i = 0; i < uTextLength; ++i)
+
+	std::shared_ptr<CHAR> pszEncryptText(new CHAR[uLength], [](CHAR * p) {delete[] p; });
+	for (UINT i = 0; i < uLength; ++i)
 	{
-		pszEnrypText.push_back(strPlainText.at(i) ^ k.at(i));
+		pszEncryptText.get()[i] = pszPlanText[i] ^ k.at(i);
 	}
+	return pszEncryptText;
 }
 
 void libTools::CRC4::Initial()
@@ -74,13 +76,12 @@ void libTools::CRC4::keyStream(_In_ UINT uLen)
 	}
 }
 
-void libTools::CRC4_Decryption::DecryptText(_In_ CONST std::string& pszEnctryText, _In_ CONST std::string& pszKey, _Out_ std::string& pszDecrypText)
+std::shared_ptr<CHAR> libTools::CRC4_Decryption::DecryptText(_In_ CONST CHAR* pszEnctryText, _In_ UINT uEncryptLength, _In_ CONST CHAR* pszKeyStream)
 {
-	UINT uEncryTextSize = pszEnctryText.length();
-	pszDecrypText.reserve(uEncryTextSize + 1);
-	for (UINT i = 0;i < uEncryTextSize; ++i)
+	std::shared_ptr<CHAR> szPlainKeyText(new CHAR[uEncryptLength], [](CHAR * p) {delete[] p; });
+	for (UINT i = 0;i < uEncryptLength; ++i)
 	{
-		pszDecrypText.push_back(pszEnctryText.at(i) ^ pszKey.at(i));
+		szPlainKeyText.get()[i] = pszEnctryText[i] ^ pszKeyStream[i];
 	}
-	pszDecrypText.push_back('\0');
+	return szPlainKeyText;
 }
