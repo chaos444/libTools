@@ -33,6 +33,9 @@ namespace libTools
 		BOOL PostSend(_In_ CSocketBuffer& SocketBuffer);
 
 		bool IsConnect() CONST;
+
+		// Single Thread ...
+		DWORD GetSendSchedule() CONST;
 	private:
 		//////static ////////////////////////////////////////////////////////////////////
 
@@ -92,6 +95,8 @@ namespace libTools
 		SHORT				_Port;
 
 		BOOL				_ExistPostRecv;
+
+		DWORD				_dwSendSchedulePercent;
 	};
 }
 
