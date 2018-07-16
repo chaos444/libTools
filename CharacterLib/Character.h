@@ -70,13 +70,13 @@ namespace libTools
 			if (s.empty())
 				return s;
 
-			CException::InvokeAction(__FUNCTIONW__, [&]
-			{
-				std::basic_string<T>::iterator c;
-				for (c = s.begin(); c != s.end() && iswspace(*c++);); s.erase(s.begin(), --c);
-				for (c = s.end(); c != s.begin() && iswspace(*--c);); s.erase(++c, s.end());
-			});
 
+			auto c = s.begin();
+			for (; c != s.end() && iswspace(*c++););
+			s.erase(s.begin(), c - 1);
+
+			for (c = s.end(); c != s.begin() && iswspace(*--c););
+			s.erase(c + 1, s.end());
 			return s;
 		}
 
@@ -243,7 +243,7 @@ namespace libTools
 		static VOID SetSpecialCharacterMode();
 
 		template<typename T>
-		static size_t GetHash(_In_ CONST std::basic_string<T>& wsText)
+		static size_t GetHash(_In_ CONST std::basic_string<T>& str)
 		{
 			size_t result = 0;
 			for (auto it = str.cbegin(); it != str.cend(); ++it) {

@@ -260,7 +260,8 @@ VOID libTools::CSocketBaseClientService::OnSend(_In_ CSocketIoEvent* pIoEvent, _
 		}
 		else
 		{
-			PostSend(pSendBuffer);
+			LOG_C_D(L"!!!Send. MaxLen=[%d], CurLen=[%d]", pSendBuffer->uMaxLength, pSendBuffer->uCurLength);
+			//PostSend(pSendBuffer);
 		}
 	}
 }
