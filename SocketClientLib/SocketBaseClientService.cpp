@@ -32,7 +32,6 @@ libTools::CSocketBaseClientService::CSocketBaseClientService() :_ServerSocket(IN
 {
 	ZeroMemory(_RecvBuffer, sizeof(_RecvBuffer));
 	_ExistPostRecv = FALSE;
-	_dwSendSchedulePercent = 0;
 }
 
 libTools::CSocketBaseClientService::~CSocketBaseClientService()
@@ -249,7 +248,6 @@ VOID libTools::CSocketBaseClientService::OnSend(_In_ CSocketIoEvent* pIoEvent, _
 	if (pSendBuffer != nullptr)
 	{
 		pSendBuffer->uCurLength += NumberOfBytesTransferred;
-		_dwSendSchedulePercent = pSendBuffer->uCurLength * 100 / pSendBuffer->uMaxLength;
 		if (pSendBuffer->uCurLength >= pSendBuffer->uMaxLength)
 		{
 			delete[] pSendBuffer->Buffer;
@@ -259,12 +257,6 @@ VOID libTools::CSocketBaseClientService::OnSend(_In_ CSocketIoEvent* pIoEvent, _
 			pSendBuffer = nullptr;
 
 			pIoEvent->SetTag<SocketSendBuffer>(nullptr);
-			_dwSendSchedulePercent = 100;
-		}
-		else
-		{
-			LOG_C_D(L"!!!Send. MaxLen=[%d], CurLen=[%d]", pSendBuffer->uMaxLength, pSendBuffer->uCurLength);
-			//PostSend(pSendBuffer);
 		}
 	}
 }
@@ -296,11 +288,6 @@ VOID libTools::CSocketBaseClientService::PostRecv()
 			}
 		}
 	});
-}
-
-DWORD libTools::CSocketBaseClientService::GetSendSchedule() CONST
-{
-	return _dwSendSchedulePercent;
 }
 
 VOID libTools::CSocketBaseClientService::Clear()
@@ -427,7 +414,6 @@ BOOL libTools::CSocketBaseClientService::PostSend(_In_ CSocketBuffer& SocketBuff
 
 	memcpy(pSendBuffer->Buffer, DataPtr.get(), uSize);
 	PostRecv();
-	_dwSendSchedulePercent = 0;
 	return PostSend(pSendBuffer);
 }
 
