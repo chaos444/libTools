@@ -9,7 +9,7 @@
 #include <include/CharacterLib/Character.h>
 
 #define _SELF L"DiskInfo.cpp"
-BOOL libTools::CDiskInfo::GetDiskSerailNumber(_In_ WCHAR wchDisk, _Out_ std::wstring& wsSerailNumber)
+BOOL libTools::CDiskInfo::GetDiskSerailNumber_BySCSI(_In_ WCHAR wchDisk, _Out_ std::wstring& wsSerailNumber)
 {
 	static WCHAR wszDeivePath[MAX_PATH] = { L"\\\\.\\?:" };
 	wszDeivePath[4] = wchDisk;
@@ -83,7 +83,87 @@ BOOL libTools::CDiskInfo::GetDiskSerailNumber(_In_ WCHAR wchDisk, _Out_ std::wst
 	FormatDiskSerialNumber(szText + 0x14);
 	wsSerailNumber =libTools::CCharacter::ASCIIToUnicode(std::string(szText + 0x14));
 	wsSerailNumber = libTools::CCharacter::Trim(wsSerailNumber);
-	return TRUE;
+	return !wsSerailNumber.empty();
+}
+
+BOOL libTools::CDiskInfo::GetDiskSerialNumber_ByIdentify(_In_ WCHAR wchDisk, _Out_ std::wstring& wsSerailNumber)
+{
+#define  DFP_GET_VERSION			0x00074080
+#define  DFP_RECEIVE_DRIVE_DATA		0x0007C088
+#define  IDE_ATAPI_IDENTIFY			0xA1  //  Returns ID sector for ATAPI.
+#define  IDE_ATA_IDENTIFY			0xEC  //  Returns ID sector for ATA.
+
+	struct GETVERSIONOUTPARAMS
+	{
+		BYTE bVersion;      // Binary driver version.
+		BYTE bRevision;     // Binary driver revision.
+		BYTE bReserved;     // Not used.
+		BYTE bIDEDeviceMap; // Bit map of IDE devices.
+		DWORD fCapabilities; // Bit mask of driver capabilities.
+		DWORD dwReserved[4]; // For future use.
+	};
+
+
+	DWORD dwDeviceNumber = 0;
+	if (!libTools::CDiskInfo::GetPhysicalDiskNumber(wchDisk, dwDeviceNumber))
+		return FALSE;
+
+	std::wstring wsPhyicalDiskNumber = libTools::CDiskInfo::FormatPhysicalDiskNumber(dwDeviceNumber);
+	HANDLE hPhysicalDriveIOCTL = ::CreateFileW(wsPhyicalDiskNumber.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
+	if (hPhysicalDriveIOCTL == INVALID_HANDLE_VALUE)
+		return FALSE;
+
+
+	SetResDeleter(hPhysicalDriveIOCTL, [](HANDLE& h) { ::CloseHandle(h); });
+
+
+
+	GETVERSIONOUTPARAMS VersionParams = { 0 };
+	DWORD               cbBytesReturned = 0;
+	if (!::DeviceIoControl(hPhysicalDriveIOCTL, DFP_GET_VERSION, NULL, 0, &VersionParams, sizeof(VersionParams), &cbBytesReturned, NULL) || VersionParams.bIDEDeviceMap <= 0)
+		return FALSE;
+
+	SENDCMDINPARAMS		scip = { 0 };
+	BYTE				bIDCmd = (VersionParams.bIDEDeviceMap >> dwDeviceNumber & 0x10) ? IDE_ATAPI_IDENTIFY : IDE_ATA_IDENTIFY; // IDE or ATAPI IDENTIFY cmd
+	BYTE				IdOutCmd[sizeof(SENDCMDOUTPARAMS) + IDENTIFY_BUFFER_SIZE - 1] = { 0 };
+
+
+	SENDCMDINPARAMS* pSCIP = reinterpret_cast<SENDCMDINPARAMS *>(IdOutCmd);
+	pSCIP->cBufferSize = IDENTIFY_BUFFER_SIZE;
+	pSCIP->irDriveRegs.bFeaturesReg = 0;
+	pSCIP->irDriveRegs.bSectorCountReg = 1;
+	pSCIP->irDriveRegs.bCylLowReg = 0;
+	pSCIP->irDriveRegs.bCylHighReg = 0;
+
+
+	// Compute the drive number.
+	pSCIP->irDriveRegs.bDriveHeadReg = 0xA0 | ((dwDeviceNumber & 1) << 4);
+
+
+	// The command can either be IDE identify or ATAPI identify.
+	pSCIP->irDriveRegs.bCommandReg = bIDCmd;
+	pSCIP->bDriveNumber = static_cast<BYTE>(dwDeviceNumber);
+	pSCIP->cBufferSize = IDENTIFY_BUFFER_SIZE;
+
+
+	if (!::DeviceIoControl(hPhysicalDriveIOCTL, DFP_RECEIVE_DRIVE_DATA, (LPVOID)pSCIP, sizeof(SENDCMDINPARAMS) - 1, (LPVOID)IdOutCmd, sizeof(SENDCMDOUTPARAMS) + IDENTIFY_BUFFER_SIZE - 1, &cbBytesReturned, NULL))
+		return FALSE;
+
+
+	CHAR szSerialNumber[1024] = { 0 };
+	USHORT* Buffer = reinterpret_cast<USHORT *>((reinterpret_cast<SENDCMDOUTPARAMS *>(IdOutCmd))->bBuffer);
+
+
+	// Max SerialNumber Size = 20
+	for (int i = 10, Pos = 0; i <= 19; ++i)
+	{
+		szSerialNumber[Pos++] = static_cast<CHAR>(Buffer[i] / 256);
+		szSerialNumber[Pos++] = static_cast<CHAR>(Buffer[i] % 256);
+	}
+
+	wsSerailNumber = libTools::CCharacter::ASCIIToUnicode(std::string(szSerialNumber));
+	libTools::CCharacter::Trim(wsSerailNumber);
+	return !wsSerailNumber.empty();
 }
 
 BOOL libTools::CDiskInfo::IsUsbDiver(_In_ WCHAR wchDisk)

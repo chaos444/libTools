@@ -34,7 +34,9 @@ namespace libTools
 		~CDiskInfo() = default;
 
 		// Get Disk SerialNumber
-		static BOOL GetDiskSerailNumber(_In_ WCHAR wchDisk, _Out_ std::wstring& wsSerailNumber);
+		static BOOL GetDiskSerailNumber_BySCSI(_In_ WCHAR wchDisk, _Out_ std::wstring& wsSerailNumber);
+
+		static BOOL GetDiskSerialNumber_ByIdentify(_In_ WCHAR wchDisk, _Out_ std::wstring& wsSerailNumber);
 
 		// Is USB
 		static BOOL IsUsbDiver(_In_ WCHAR wchDisk);
