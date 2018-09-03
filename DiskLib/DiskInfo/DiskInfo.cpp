@@ -7,6 +7,7 @@
 #include <include/ProcessLib/Common/ResHandleManager.h>
 #include <include/LogLib/Log.h>
 #include <include/CharacterLib/Character.h>
+#include <iostream>
 
 #define _SELF L"DiskInfo.cpp"
 BOOL libTools::CDiskInfo::GetDiskSerailNumber_BySCSI(_In_ WCHAR wchDisk, _Out_ std::wstring& wsSerailNumber)
@@ -22,68 +23,60 @@ BOOL libTools::CDiskInfo::GetDiskSerailNumber_BySCSI(_In_ WCHAR wchDisk, _Out_ s
 		return FALSE;
 	}
 
-	STORAGE_PROPERTY_QUERY query;
-	memset(&query, 0, sizeof(query));
-	query.QueryType = PropertyStandardQuery;
-	query.PropertyId = StorageDeviceProperty;
-
-
-	PSTORAGE_DEVICE_DESCRIPTOR pdeviceDescriptor = new STORAGE_DEVICE_DESCRIPTOR;
-	memset(pdeviceDescriptor, 0, sizeof(STORAGE_DEVICE_DESCRIPTOR));
-	SetResDeleter(pdeviceDescriptor, [](PSTORAGE_DEVICE_DESCRIPTOR& pDescriptor) { delete pDescriptor; pDescriptor = nullptr; });
-	SetResDeleter(hPhysicalDriveIOCTL, [](HANDLE& hFile) { ::CloseHandle(hFile); hFile = NULL; });
-
-
-	DWORD dwRetLen = 0;
-	if (!::DeviceIoControl(hPhysicalDriveIOCTL, IOCTL_STORAGE_QUERY_PROPERTY, &query, sizeof(query), pdeviceDescriptor, sizeof(STORAGE_DEVICE_DESCRIPTOR), &dwRetLen, 0))
-	{
-		LOG_C_E(L"[%s] IOCTL_STORAGE_QUERY_PROPERTY = FALSE!", wszDeivePath);
-		return FALSE;
-	}
-
 
 	DWORD returned = 0;
-	SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER Buffer;
-	ZeroMemory(&Buffer, sizeof(SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER));
-	Buffer.sptd.Length = sizeof(SCSI_PASS_THROUGH_DIRECT);
-	Buffer.sptd.ScsiStatus = 0x0;
-	Buffer.sptd.PathId = 0x0;
-	Buffer.sptd.TargetId = 0x0;
-	Buffer.sptd.Lun = 0x0;
-	Buffer.sptd.CdbLength = 0xC;
-	Buffer.sptd.SenseInfoLength = SPT_SENSE_LENGTH;
-	Buffer.sptd.DataIn = SCSI_IOCTL_DATA_IN;
-	Buffer.sptd.DataTransferLength = 0x200;
-	Buffer.sptd.TimeOutValue = 0x1A5E0;
+	SCSI_PASS_THROUGH_WITH_BUFFERS Buffer;
 
-
-	// Buffer
-	CHAR szText[1024] = { 0 };
-	Buffer.sptd.DataBuffer = szText;
-	Buffer.sptd.SenseInfoOffset = offsetof(SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER, ucSenseBuf);
-
-
-	// Fill 
-	memset(Buffer.sptd.Cdb, 0, sizeof(Buffer.sptd.Cdb));
-	Buffer.sptd.Cdb[0] = SCSIOP_BLANK;
-	Buffer.sptd.Cdb[1] = 0x8;
-	Buffer.sptd.Cdb[2] = 0xE;
-	Buffer.sptd.Cdb[4] = 0x1;// (UCHAR)(sectorSize >> 8);  // Parameter List length
-	Buffer.sptd.Cdb[8] = 0xA0;
-	Buffer.sptd.Cdb[9] = 0xEC;
-
-
-	if (!DeviceIoControl(hPhysicalDriveIOCTL, IOCTL_SCSI_PASS_THROUGH_DIRECT, &Buffer, sizeof(SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER), &Buffer, sizeof(SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER), &returned, FALSE))
+	CONST static std::vector<DWORD> VecTarget = { 0xA0, 0xB0 };
+	for (auto& Target : VecTarget)
 	{
-		LOG_C_E(L"ªÒ»°”≤≈Ã[%s] –Ú¡–∫≈ ß∞‹", wszDeivePath);
-		return FALSE;
+		ZeroMemory(&Buffer, sizeof(SCSI_PASS_THROUGH_WITH_BUFFERS));
+		Buffer.Spt.Length = sizeof(SCSI_PASS_THROUGH_DIRECT);
+		Buffer.Spt.PathId = 0;
+		Buffer.Spt.TargetId = 0;
+		Buffer.Spt.Lun = 0;
+		Buffer.Spt.SenseInfoLength = 24;
+		Buffer.Spt.DataIn = SCSI_IOCTL_DATA_IN;
+		Buffer.Spt.DataTransferLength = IDENTIFY_BUFFER_SIZE;
+		Buffer.Spt.TimeOutValue = 0x1A5E0;
+		Buffer.Spt.DataBufferOffset = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS, DataBuf);
+		Buffer.Spt.SenseInfoOffset = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS, SenseBuf);
+
+
+		// Fill 
+		memset(Buffer.Spt.Cdb, 0, sizeof(Buffer.Spt.Cdb));
+		Buffer.Spt.CdbLength = 12;
+		Buffer.Spt.Cdb[0] = 0xA1;
+		Buffer.Spt.Cdb[1] = (4 << 1) | 0;
+		Buffer.Spt.Cdb[2] = (1 << 3) | (1 << 2) | 2;
+		Buffer.Spt.Cdb[3] = 0;
+		Buffer.Spt.Cdb[4] = 1;
+		Buffer.Spt.Cdb[5] = 0;
+		Buffer.Spt.Cdb[6] = 0;
+		Buffer.Spt.Cdb[7] = 0;
+		Buffer.Spt.Cdb[8] = static_cast<UCHAR>(Target);
+		Buffer.Spt.Cdb[9] = ID_CMD;
+
+
+		UINT uLength = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS, DataBuf) + Buffer.Spt.DataTransferLength;
+		if (!DeviceIoControl(hPhysicalDriveIOCTL, IOCTL_SCSI_PASS_THROUGH, &Buffer, sizeof(SCSI_PASS_THROUGH), &Buffer, uLength, &returned, FALSE))
+		{
+			LOG_C_E(L"ªÒ»°”≤≈Ã[%s] –Ú¡–∫≈ ß∞‹", wszDeivePath);
+			return FALSE;
+		}
+
+
+		ATA_IDENTIFY_DEVICE AtaIdentifyDevice;
+		memcpy(&AtaIdentifyDevice, Buffer.DataBuf, sizeof(AtaIdentifyDevice));
+
+		FormatDiskSerialNumber(AtaIdentifyDevice.SerialNumber);
+		wsSerailNumber = libTools::CCharacter::ASCIIToUnicode(AtaIdentifyDevice.SerialNumber);
+		wsSerailNumber = libTools::CCharacter::Trim(wsSerailNumber);
+		if (!wsSerailNumber.empty())
+			return TRUE;
 	}
 
-
-	FormatDiskSerialNumber(szText + 0x14);
-	wsSerailNumber =libTools::CCharacter::ASCIIToUnicode(std::string(szText + 0x14));
-	wsSerailNumber = libTools::CCharacter::Trim(wsSerailNumber);
-	return !wsSerailNumber.empty();
+	return FALSE;
 }
 
 BOOL libTools::CDiskInfo::GetDiskSerialNumber_ByIdentify(_In_ WCHAR wchDisk, _Out_ std::wstring& wsSerailNumber)
@@ -250,8 +243,8 @@ BOOL libTools::CDiskInfo::IsBasicDisk(_In_ WCHAR wchDisk)
 
 UINT libTools::CDiskInfo::GetDiskSize(_In_ WCHAR wchDisk)
 {
-	std::wstring wsPath = L"";
-	wsPath.append(1, wchDisk);
+	std::wstring wsPath = L"C:\\";
+	wsPath[0] = wchDisk;
 
 
 	std::experimental::filesystem::v1::path GameDisk(wsPath);

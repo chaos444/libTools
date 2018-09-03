@@ -9,14 +9,22 @@
 #pragma comment(lib,"ExceptionLib_Debug.lib")
 #pragma comment(lib,"LogLib_Debug.lib")
 #pragma comment(lib,"CharacterLib_Debug.lib")
+#pragma comment(lib,"ProcessLib_Debug.lib")
 #else
 #pragma comment(lib,"ExceptionLib.lib")
 #pragma comment(lib,"LogLib.lib")
 #pragma comment(lib,"CharacterLib.lib")
+#pragma comment(lib,"ProcessLib.lib")
 #endif // _DEBUG
 
 
 #define _SELF L"DbManager.cpp"
+
+libTools::CBaseDbManager::~CBaseDbManager()
+{
+	StopAsyncThread();
+}
+
 BOOL libTools::CBaseDbManager::ExcuteSQL(_In_ CONST std::wstring wsSQL, _In_ UINT uResultCount, _Out_ std::vector<Table>& VecResult) CONST
 {
 	std::lock_guard<std::mutex> Lock_(_Mtx);
@@ -163,26 +171,31 @@ BOOL libTools::CBaseDbManager::ExcuteSQL_NoneResult(_In_ CONST std::wstring& wsS
 	});
 }
 
-VOID libTools::CBaseDbManager::AsyncExcuteSQL(_In_ CONST std::wstring& wsSQL) CONST
+VOID libTools::CBaseDbManager::AsyncExcuteSQL(_In_ CONST std::wstring& wsSQL)
 {
-	CException::InvokeAction(__FUNCTIONW__, [&]
+	if (_bRun)
 	{
-		if (!ExcuteSQL_NoneResult(wsSQL))
-		{
-			LOG_CF_E(L"ExcuteSQL_NoneResult Faild! SQL=%s", wsSQL.c_str());
-		}
-		auto fnMethodPtr = [this](_In_ WCHAR* pwszText)
-		{
-			CException::InvokeAction(__FUNCTIONW__, [&]
-			{
-				std::wstring wsSQL(pwszText);
-				if (!ExcuteSQL_NoneResult(wsSQL))
-					LOG_CF_E(L"ExcuteSQL_NoneResult Faild! SQL=%s", wsSQL.c_str());
+		std::lock_guard<CBaseDbManager> Lck(*this);
+		_QueAsyncSQL.push(wsSQL);
+	}
+}
 
-				delete[] pwszText;
-			});
-		};
-	});
+VOID libTools::CBaseDbManager::RunAsyncThread()
+{
+	if (!_bRun)
+	{
+		_bRun = TRUE;
+		_hAsyncThread = std::thread(&libTools::CBaseDbManager::_AsyncThread, this);
+	}
+}
+
+VOID libTools::CBaseDbManager::StopAsyncThread()
+{
+	_bRun = FALSE;
+	if (_hAsyncThread.joinable())
+	{
+		_hAsyncThread.join();
+	}
 }
 
 BOOL libTools::CBaseDbManager::InitializeSQLEnv(_Out_ SQLEnvParam& Env) CONST
@@ -292,4 +305,28 @@ VOID libTools::CBaseDbManager::FreeMem(_In_ SQLEnvParam& Env) CONST
 			Env.hEnv = SQL_NULL_HENV;
 		}
 	});
+}
+
+VOID libTools::CBaseDbManager::_AsyncThread()
+{
+	while (_bRun)
+	{
+		this->Lock();
+		if (_QueAsyncSQL.empty())
+		{
+			this->UnLock();
+			::Sleep(100);
+			continue;
+		}
+
+
+		std::wstring wsSQL = _QueAsyncSQL.front();
+		_QueAsyncSQL.pop();
+		this->UnLock();
+
+		if (!ExcuteSQL_NoneResult(wsSQL))
+		{
+			LOG_CF_E(L"ExcuteSQL_NoneResult = FALSE, SQL='%s'", wsSQL.c_str());
+		}
+	}
 }

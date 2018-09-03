@@ -6,10 +6,13 @@
 #include <sqltypes.h>	// Type SQLHENV & SQLHDBC & SQLHSTMT
 #include <sqlext.h>		// macro SQL_NULL_HENV
 #include <mutex>
+#include <thread>
+#include <queue>
+#include <ProcessLib/Lock/Lock.h>
 
 namespace libTools
 {
-	class CBaseDbManager
+	class CBaseDbManager : public libTools::CThreadLock
 	{
 	private:
 		struct SQLEnvParam
@@ -22,7 +25,7 @@ namespace libTools
 		typedef std::vector<std::wstring> Table;
 	public:
 		CBaseDbManager() = default;
-		~CBaseDbManager() = default;
+		~CBaseDbManager();
 
 		// Warning, Declare local Variable Max Size = 128
 		BOOL ExcuteSQL(_In_ CONST std::wstring wsSQL, _In_ UINT uResultCount, _Out_ std::vector<Table>& VecResult) CONST;
@@ -37,7 +40,13 @@ namespace libTools
 		BOOL ExcuteSQL_NoneResult(_In_ CONST std::wstring& wsSQL) CONST;
 
 		//
-		VOID AsyncExcuteSQL(_In_ CONST std::wstring& wsSQL) CONST;
+		VOID AsyncExcuteSQL(_In_ CONST std::wstring& wsSQL);
+
+		//
+		VOID RunAsyncThread();
+
+		//
+		VOID StopAsyncThread();
 	private:
 		// 
 		BOOL InitializeSQLEnv(_Out_ SQLEnvParam& Env) CONST;
@@ -50,11 +59,18 @@ namespace libTools
 
 		// 
 		virtual VOID Initialize() = NULL;
+
+	private:
+		VOID _AsyncThread();
 	protected:
-		std::wstring _wsDns;
-		std::wstring _wsDbUser;
-		std::wstring _wsDbPass;
+		std::wstring	_wsDns;
+		std::wstring	_wsDbUser;
+		std::wstring	_wsDbPass;
+		BOOL			_bRun = FALSE;
+		std::thread		_hAsyncThread;
 		mutable std::mutex _Mtx;
+		
+		std::queue<std::wstring> _QueAsyncSQL;
 	};
 }
 
