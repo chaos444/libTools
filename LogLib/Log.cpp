@@ -89,7 +89,7 @@ VOID libTools::CLog::Release()
 		::CloseHandle(_hSaveThread);
 		_hSaveThread = NULL;
 	}
-	if (_hSaveThread != NULL)
+	if (_hSendThread != NULL)
 	{
 		::WaitForSingleObject(_hSendThread, 1000);
 		::CloseHandle(_hSendThread);
