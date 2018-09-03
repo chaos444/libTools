@@ -24,6 +24,15 @@ VOID libTools::CSocketBuffer::SetValue_By_Buffer(_Out_ DWORD& dwValue, _In_ CONS
 	//*ValuePtr++ = Buffer[3];
 }
 
+libTools::CSocketBuffer& libTools::CSocketBuffer::operator<<(ULONGLONG ulValue)
+{
+	for (int i = 0;i < 8; ++i)
+	{
+		Set(static_cast<BYTE>(ulValue >> (i * 0x8) & 0xFF));
+	}
+	return *this;
+}
+
 libTools::CSocketBuffer& libTools::CSocketBuffer::operator<<(int nValue)
 {
 	return *this << static_cast<DWORD>(nValue);
@@ -94,6 +103,15 @@ libTools::CSocketBuffer& libTools::CSocketBuffer::operator>>(DWORD& dwValue)
 	return *this;
 }
 
+libTools::CSocketBuffer& libTools::CSocketBuffer::operator>>(ULONGLONG& ulValue)
+{
+	BYTE* ValuePtr = reinterpret_cast<BYTE*>(&ulValue);
+	for (int i = 0; i < 8; ++i)
+	{
+		*ValuePtr++ = Get();
+	}
+	return *this;
+}
 libTools::CSocketBuffer& libTools::CSocketBuffer::operator>>(WORD& wValue)
 {
 	BYTE* ValuePtr = reinterpret_cast<BYTE*>(&wValue);
@@ -137,6 +155,7 @@ libTools::CSocketBuffer& libTools::CSocketBuffer::operator>>(UINT& uValue)
 {
 	return *this >> reinterpret_cast<DWORD&>(uValue);
 }
+
 
 std::shared_ptr<CHAR> libTools::CSocketBuffer::GetBuffer(_Out_ UINT& uSize)
 {

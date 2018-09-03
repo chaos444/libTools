@@ -50,6 +50,8 @@ namespace libTools
 
 		static VOID SetValue_By_Buffer(_Out_ DWORD& dwValue, _In_ CONST BYTE* Buffer);
 
+		CSocketBuffer& operator << (ULONGLONG ulValue);
+
 		CSocketBuffer& operator << (DWORD dwValue);
 
 		CSocketBuffer& operator << (UINT uValue);
@@ -69,6 +71,8 @@ namespace libTools
 		CSocketBuffer& operator << (LPCWSTR lpwszText);
 
 		CSocketBuffer& operator >> (DWORD& dwValue);
+
+		CSocketBuffer& operator >> (ULONGLONG& ulValue);
 
 		CSocketBuffer& operator >> (WORD& wValue);
 
