@@ -37,7 +37,7 @@ DWORD libTools::CSearchBinary::FindCALL(_In_ LPCSTR lpszCode, _In_ int nOffset, 
 
 
 		// 不是CALL!
-		if (CMemory::ReadBYTE(dwAddr) == 0xE8)
+		if (CMemory::ReadBYTE(dwAddr) == 0xE8 || CMemory::ReadBYTE(dwAddr) == 0xFF)
 		{
 			//首先计算相对地址
 			DWORD dwModuleAddr = reinterpret_cast<DWORD>(::GetModuleHandleW(lpszModule));

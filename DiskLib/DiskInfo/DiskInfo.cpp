@@ -24,59 +24,27 @@ BOOL libTools::CDiskInfo::GetDiskSerailNumber_BySCSI(_In_ WCHAR wchDisk, _Out_ s
 	}
 
 
-	DWORD returned = 0;
-	SCSI_PASS_THROUGH_WITH_BUFFERS Buffer;
+	if (GetUsbDriverSerailNumber_By_NvmeAsMedia(hPhysicalDriveIOCTL, wsSerailNumber))
+		return TRUE;
 
-	CONST static std::vector<DWORD> VecTarget = { 0xA0, 0xB0 };
-	for (auto& Target : VecTarget)
+
+	CONST static std::vector<em_Disk_SatType> VecSatType = 
 	{
-		ZeroMemory(&Buffer, sizeof(SCSI_PASS_THROUGH_WITH_BUFFERS));
-		Buffer.Spt.Length = sizeof(SCSI_PASS_THROUGH_DIRECT);
-		Buffer.Spt.PathId = 0;
-		Buffer.Spt.TargetId = 0;
-		Buffer.Spt.Lun = 0;
-		Buffer.Spt.SenseInfoLength = 24;
-		Buffer.Spt.DataIn = SCSI_IOCTL_DATA_IN;
-		Buffer.Spt.DataTransferLength = IDENTIFY_BUFFER_SIZE;
-		Buffer.Spt.TimeOutValue = 0x1A5E0;
-		Buffer.Spt.DataBufferOffset = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS, DataBuf);
-		Buffer.Spt.SenseInfoOffset = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS, SenseBuf);
+		em_Disk_SatType::SAT,  em_Disk_SatType::JMICRON, em_Disk_SatType::SUNPLUS,
+		em_Disk_SatType::CYPRESS, em_Disk_SatType::LOGITEC1, em_Disk_SatType::LOGITEC2
+	};
 
-
-		// Fill 
-		memset(Buffer.Spt.Cdb, 0, sizeof(Buffer.Spt.Cdb));
-		Buffer.Spt.CdbLength = 12;
-		Buffer.Spt.Cdb[0] = 0xA1;
-		Buffer.Spt.Cdb[1] = (4 << 1) | 0;
-		Buffer.Spt.Cdb[2] = (1 << 3) | (1 << 2) | 2;
-		Buffer.Spt.Cdb[3] = 0;
-		Buffer.Spt.Cdb[4] = 1;
-		Buffer.Spt.Cdb[5] = 0;
-		Buffer.Spt.Cdb[6] = 0;
-		Buffer.Spt.Cdb[7] = 0;
-		Buffer.Spt.Cdb[8] = static_cast<UCHAR>(Target);
-		Buffer.Spt.Cdb[9] = ID_CMD;
-
-
-		UINT uLength = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS, DataBuf) + Buffer.Spt.DataTransferLength;
-		if (!DeviceIoControl(hPhysicalDriveIOCTL, IOCTL_SCSI_PASS_THROUGH, &Buffer, sizeof(SCSI_PASS_THROUGH), &Buffer, uLength, &returned, FALSE))
+	for (auto& SatType : VecSatType)
+	{
+		if (GetUsbDriverSerialNumber_By_SatType(hPhysicalDriveIOCTL, SatType, wsSerailNumber))
 		{
-			LOG_C_E(L"ªÒ»°”≤≈Ã[%s] –Ú¡–∫≈ ß∞‹", wszDeivePath);
-			return FALSE;
-		}
-
-
-		ATA_IDENTIFY_DEVICE AtaIdentifyDevice;
-		memcpy(&AtaIdentifyDevice, Buffer.DataBuf, sizeof(AtaIdentifyDevice));
-
-		FormatDiskSerialNumber(AtaIdentifyDevice.SerialNumber);
-		wsSerailNumber = libTools::CCharacter::ASCIIToUnicode(AtaIdentifyDevice.SerialNumber);
-		wsSerailNumber = libTools::CCharacter::Trim(wsSerailNumber);
-		if (!wsSerailNumber.empty())
 			return TRUE;
+		}
 	}
 
-	return FALSE;
+	
+
+	return GetUsbDriverSerialNumber_By_NvmeJMicron(hPhysicalDriveIOCTL, wsSerailNumber);
 }
 
 BOOL libTools::CDiskInfo::GetDiskSerialNumber_ByIdentify(_In_ WCHAR wchDisk, _Out_ std::wstring& wsSerailNumber)
@@ -250,6 +218,298 @@ UINT libTools::CDiskInfo::GetDiskSize(_In_ WCHAR wchDisk)
 	std::experimental::filesystem::v1::path GameDisk(wsPath);
 	auto uMaxSpace = std::experimental::filesystem::v1::space(GameDisk).capacity;
 	return static_cast<UINT>(uMaxSpace / 1024 / 1024 / 1024);
+}
+
+BOOL libTools::CDiskInfo::GetUsbDriverSerialNumber_By_SatType(_In_ HANDLE hDisk, _In_ em_Disk_SatType emSatType, _Out_ std::wstring& wsSerailNumber)
+{
+	DWORD dwRetCode = 0;
+	SCSI_PASS_THROUGH_WITH_BUFFERS Buffer;
+
+
+	CONST static std::vector<DWORD> VecTarget = { 0xA0, 0xB0 };
+	for (auto& Target : VecTarget)
+	{
+		ZeroMemory(&Buffer, sizeof(SCSI_PASS_THROUGH_WITH_BUFFERS));
+		Buffer.Spt.Length = sizeof(SCSI_PASS_THROUGH);
+		Buffer.Spt.PathId = 0;
+		Buffer.Spt.TargetId = 0;
+		Buffer.Spt.Lun = 0;
+		Buffer.Spt.SenseInfoLength = 24;
+		Buffer.Spt.DataIn = SCSI_IOCTL_DATA_IN;
+		Buffer.Spt.DataTransferLength = IDENTIFY_BUFFER_SIZE;
+		Buffer.Spt.TimeOutValue = 0x1A5E0;
+		Buffer.Spt.DataBufferOffset = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS, DataBuf);
+		Buffer.Spt.SenseInfoOffset = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS, SenseBuf);
+
+
+		// Fill 
+		memset(Buffer.Spt.Cdb, 0, sizeof(Buffer.Spt.Cdb));
+		Buffer.Spt.CdbLength = 12;
+
+
+		switch (emSatType)
+		{
+		case libTools::CDiskInfo::em_Disk_SatType::SAT:
+			Buffer.Spt.Cdb[0] = 0xA1;
+			Buffer.Spt.Cdb[1] = (4 << 1) | 0;
+			Buffer.Spt.Cdb[2] = (1 << 3) | (1 << 2) | 2;
+			Buffer.Spt.Cdb[3] = 0;
+			Buffer.Spt.Cdb[4] = 1;
+			Buffer.Spt.Cdb[5] = 0;
+			Buffer.Spt.Cdb[6] = 0;
+			Buffer.Spt.Cdb[7] = 0;
+			Buffer.Spt.Cdb[8] = static_cast<UCHAR>(Target);
+			Buffer.Spt.Cdb[9] = ID_CMD;
+			break;
+		case libTools::CDiskInfo::em_Disk_SatType::JMICRON:
+			Buffer.Spt.CdbLength = 12;
+			Buffer.Spt.Cdb[0] = 0xDF;
+			Buffer.Spt.Cdb[1] = 0x10;
+			Buffer.Spt.Cdb[2] = 0x00;
+			Buffer.Spt.Cdb[3] = 0x02;
+			Buffer.Spt.Cdb[4] = 0x00;
+			Buffer.Spt.Cdb[5] = 0x00;
+			Buffer.Spt.Cdb[6] = 0x01;
+			Buffer.Spt.Cdb[7] = 0x00;
+			Buffer.Spt.Cdb[8] = 0x00;
+			Buffer.Spt.Cdb[9] = 0x00;
+			Buffer.Spt.Cdb[10] = static_cast<UCHAR>(Target);
+			Buffer.Spt.Cdb[11] = 0xEC; // ID_CMD
+			break;
+		case libTools::CDiskInfo::em_Disk_SatType::SUNPLUS:
+			Buffer.Spt.CdbLength = 12;
+			Buffer.Spt.Cdb[0] = 0xF8;
+			Buffer.Spt.Cdb[1] = 0x00;
+			Buffer.Spt.Cdb[2] = 0x22;
+			Buffer.Spt.Cdb[3] = 0x10;
+			Buffer.Spt.Cdb[4] = 0x01;
+			Buffer.Spt.Cdb[5] = 0x00;
+			Buffer.Spt.Cdb[6] = 0x01;
+			Buffer.Spt.Cdb[7] = 0x00;
+			Buffer.Spt.Cdb[8] = 0x00;
+			Buffer.Spt.Cdb[9] = 0x00;
+			Buffer.Spt.Cdb[10] = static_cast<UCHAR>(Target);
+			Buffer.Spt.Cdb[11] = 0xEC; // ID_CMD
+			break;
+		case libTools::CDiskInfo::em_Disk_SatType::CYPRESS:
+			Buffer.Spt.CdbLength = 16;
+			Buffer.Spt.Cdb[0] = 0x24;
+			Buffer.Spt.Cdb[1] = 0x24;
+			Buffer.Spt.Cdb[2] = 0x00;
+			Buffer.Spt.Cdb[3] = 0xBE;
+			Buffer.Spt.Cdb[4] = 0x01;
+			Buffer.Spt.Cdb[5] = 0x00;
+			Buffer.Spt.Cdb[6] = 0x00;
+			Buffer.Spt.Cdb[7] = 0x01;
+			Buffer.Spt.Cdb[8] = 0x00;
+			Buffer.Spt.Cdb[9] = 0x00;
+			Buffer.Spt.Cdb[10] = 0x00;
+			Buffer.Spt.Cdb[11] = static_cast<UCHAR>(Target);
+			Buffer.Spt.Cdb[12] = 0xEC; // ID_CMD
+			Buffer.Spt.Cdb[13] = 0x00;
+			Buffer.Spt.Cdb[14] = 0x00;
+			Buffer.Spt.Cdb[15] = 0x00;
+			break;
+		case libTools::CDiskInfo::em_Disk_SatType::LOGITEC1:
+			Buffer.Spt.CdbLength = 10;
+			Buffer.Spt.Cdb[0] = 0xE0;
+			Buffer.Spt.Cdb[1] = 0x00;
+			Buffer.Spt.Cdb[2] = 0x00;
+			Buffer.Spt.Cdb[3] = 0x00;
+			Buffer.Spt.Cdb[4] = 0x00;
+			Buffer.Spt.Cdb[5] = 0x00;
+			Buffer.Spt.Cdb[6] = 0x00;
+			Buffer.Spt.Cdb[7] = static_cast<UCHAR>(Target);
+			Buffer.Spt.Cdb[8] = 0xEC;  // ID_CMD
+			Buffer.Spt.Cdb[9] = 0x4C;
+			break;
+		case libTools::CDiskInfo::em_Disk_SatType::LOGITEC2:
+			Buffer.Spt.CdbLength = 16;
+			Buffer.Spt.Cdb[0] = 0xD8;
+			Buffer.Spt.Cdb[1] = 0x15;
+			Buffer.Spt.Cdb[2] = 0x00;
+			Buffer.Spt.Cdb[3] = 0x00;
+			Buffer.Spt.Cdb[4] = 0x06;
+			Buffer.Spt.Cdb[5] = 0x7B;
+			Buffer.Spt.Cdb[6] = 0x00;
+			Buffer.Spt.Cdb[7] = 0x00;
+			Buffer.Spt.Cdb[8] = 0x02;
+			Buffer.Spt.Cdb[9] = 0x00;
+			Buffer.Spt.Cdb[10] = 0x01;
+			Buffer.Spt.Cdb[11] = 0x00;
+			Buffer.Spt.Cdb[12] = 0x00;
+			Buffer.Spt.Cdb[13] = 0x00;
+			Buffer.Spt.Cdb[14] = static_cast<UCHAR>(Target);
+			Buffer.Spt.Cdb[15] = 0xEC; // ID_CMD
+			break;
+		default:
+			break;
+		}
+		
+
+
+		UINT uLength = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS, DataBuf) + Buffer.Spt.DataTransferLength;
+		if (!DeviceIoControl(hDisk, IOCTL_SCSI_PASS_THROUGH, &Buffer, sizeof(SCSI_PASS_THROUGH), &Buffer, uLength, &dwRetCode, FALSE))
+		{
+			LOG_C_E(L"ªÒ»°”≤≈Ã–Ú¡–∫≈ ß∞‹");
+			return FALSE;
+		}
+
+
+		ATA_IDENTIFY_DEVICE AtaIdentifyDevice;
+		memcpy(&AtaIdentifyDevice, Buffer.DataBuf, sizeof(AtaIdentifyDevice));
+
+
+		FormatDiskSerialNumber(AtaIdentifyDevice.SerialNumber);
+		wsSerailNumber = libTools::CCharacter::ASCIIToUnicode(AtaIdentifyDevice.SerialNumber);
+		wsSerailNumber = libTools::CCharacter::Trim(wsSerailNumber);
+		if (!wsSerailNumber.empty())
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL libTools::CDiskInfo::GetUsbDriverSerailNumber_By_NvmeAsMedia(_In_ HANDLE hDisk, _Out_ std::wstring& wsSerailNumber)
+{
+	DWORD dwRetCode = 0;
+	SCSI_PASS_THROUGH_WITH_BUFFERS Buffer;
+
+
+	ZeroMemory(&Buffer, sizeof(SCSI_PASS_THROUGH_WITH_BUFFERS));
+	Buffer.Spt.Length = sizeof(SCSI_PASS_THROUGH);
+	Buffer.Spt.PathId = 0;
+	Buffer.Spt.TargetId = 0;
+	Buffer.Spt.Lun = 0;
+	Buffer.Spt.SenseInfoLength = 24;
+	Buffer.Spt.DataTransferLength = 4096;
+	Buffer.Spt.TimeOutValue = 0x1A5E0;
+	Buffer.Spt.DataIn = SCSI_IOCTL_DATA_IN;
+	Buffer.Spt.DataBufferOffset = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS, DataBuf);
+	Buffer.Spt.SenseInfoOffset = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS, SenseBuf);
+
+
+	// Fill 
+	memset(Buffer.Spt.Cdb, 0, sizeof(Buffer.Spt.Cdb));
+	Buffer.Spt.CdbLength = 16;
+	Buffer.Spt.Cdb[0] = 0xE6;
+	Buffer.Spt.Cdb[1] = 0x06;
+	Buffer.Spt.Cdb[3] = 0x1;
+
+	UINT uLength = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS, DataBuf) + Buffer.Spt.DataTransferLength;
+	if (!DeviceIoControl(hDisk, IOCTL_SCSI_PASS_THROUGH, &Buffer, uLength, &Buffer, uLength, &dwRetCode, FALSE))
+	{
+		LOG_C_E(L"ªÒ»°”≤≈Ã–Ú¡–∫≈ ß∞‹");
+		return FALSE;
+	}
+
+
+	ATA_IDENTIFY_DEVICE AtaIdentifyDevice;
+	memcpy(&AtaIdentifyDevice, Buffer.DataBuf, sizeof(AtaIdentifyDevice));
+	
+
+	FormatDiskSerialNumber(AtaIdentifyDevice.SerialNumber);
+	wsSerailNumber = libTools::CCharacter::ASCIIToUnicode(AtaIdentifyDevice.SerialNumber);
+	wsSerailNumber = libTools::CCharacter::Trim(wsSerailNumber);
+	if (!wsSerailNumber.empty())
+		return TRUE;
+
+	return FALSE;
+}
+
+BOOL libTools::CDiskInfo::GetUsbDriverSerialNumber_By_NvmeJMicron(_In_ HANDLE hDisk, _Out_ std::wstring& wsSerailNumber)
+{
+	DWORD dwRetCode = 0;
+	SCSI_PASS_THROUGH_WITH_BUFFERS24 Buffer;
+
+
+	ZeroMemory(&Buffer, sizeof(SCSI_PASS_THROUGH_WITH_BUFFERS24));
+	Buffer.Spt.Length = sizeof(SCSI_PASS_THROUGH);
+	Buffer.Spt.PathId = 0;
+	Buffer.Spt.TargetId = 0;
+	Buffer.Spt.Lun = 0;
+	Buffer.Spt.SenseInfoLength = 24;
+	Buffer.Spt.DataTransferLength = IDENTIFY_BUFFER_SIZE;
+	Buffer.Spt.TimeOutValue = 2;
+	Buffer.Spt.DataIn = SCSI_IOCTL_DATA_OUT;
+	Buffer.Spt.DataBufferOffset = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS24, DataBuf);
+	Buffer.Spt.SenseInfoOffset = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS24, SenseBuf);
+
+
+	// Fill 
+	memset(Buffer.Spt.Cdb, 0, sizeof(Buffer.Spt.Cdb));
+	Buffer.Spt.CdbLength = 12;
+	Buffer.Spt.Cdb[0] = 0xA1;
+	Buffer.Spt.Cdb[1] = 0x80;
+	Buffer.Spt.Cdb[4] = 0x02;
+
+
+	memset(Buffer.DataBuf, 0, sizeof(Buffer.DataBuf));
+	Buffer.DataBuf[0] = 'N';
+	Buffer.DataBuf[0] = 'V';
+	Buffer.DataBuf[0] = 'M';
+	Buffer.DataBuf[0] = 'E';
+	Buffer.DataBuf[8] = 0x06;
+	Buffer.DataBuf[0x30] = 0x01;
+
+	UINT uLength = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS24, DataBuf) + Buffer.Spt.DataTransferLength;
+	if (!DeviceIoControl(hDisk, IOCTL_SCSI_PASS_THROUGH, &Buffer, uLength, &Buffer, uLength, &dwRetCode, FALSE))
+	{
+		LOG_C_E(L"ªÒ»°”≤≈Ã–Ú¡–∫≈ ß∞‹ NvmeJMicron v1");
+		return FALSE;
+	}
+
+
+	Buffer.Spt.Length = sizeof(SCSI_PASS_THROUGH);
+	Buffer.Spt.PathId = 0;
+	Buffer.Spt.TargetId = 0;
+	Buffer.Spt.Lun = 0;
+	Buffer.Spt.SenseInfoLength = 24;
+	Buffer.Spt.DataTransferLength = IDENTIFY_BUFFER_SIZE;
+	Buffer.Spt.TimeOutValue = 2;
+	Buffer.Spt.DataIn = SCSI_IOCTL_DATA_IN; // Change
+	Buffer.Spt.DataBufferOffset = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS24, DataBuf);
+	Buffer.Spt.SenseInfoOffset = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS24, SenseBuf);
+
+
+	memset(Buffer.Spt.Cdb, 0, sizeof(Buffer.Spt.Cdb));
+	Buffer.Spt.CdbLength = 12;
+	Buffer.Spt.Cdb[0] = 0xA1;
+	Buffer.Spt.Cdb[1] = 0x82; // Change
+	Buffer.Spt.Cdb[4] = 0x02;
+
+
+	uLength = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS24, DataBuf) + Buffer.Spt.DataTransferLength;
+	if (!DeviceIoControl(hDisk, IOCTL_SCSI_PASS_THROUGH, &Buffer, uLength, &Buffer, uLength, &dwRetCode, FALSE))
+	{
+		LOG_C_E(L"ªÒ»°”≤≈Ã–Ú¡–∫≈ ß∞‹ NvmeJMicron v2");
+		return FALSE;
+	}
+
+
+	struct NVME_IDENTIFY_DEVICE
+	{
+		CHAR		Reserved1[4];
+		CHAR		SerialNumber[20];
+		CHAR		Model[40];
+		CHAR		FirmwareRev[8];
+		CHAR		Reserved2[9];
+		CHAR		MinorVersion;
+		SHORT		MajorVersion;
+		CHAR		Reserved3[428];
+	};
+
+	NVME_IDENTIFY_DEVICE AtaIdentifyDevice;
+	memcpy(&AtaIdentifyDevice, Buffer.DataBuf, sizeof(AtaIdentifyDevice));
+
+
+	FormatDiskSerialNumber(AtaIdentifyDevice.SerialNumber);
+	wsSerailNumber = libTools::CCharacter::ASCIIToUnicode(AtaIdentifyDevice.SerialNumber);
+	wsSerailNumber = libTools::CCharacter::Trim(wsSerailNumber);
+	if (!wsSerailNumber.empty())
+		return TRUE;
+
+	return FALSE;
 }
 
 std::wstring libTools::CDiskInfo::FormatPhysicalDiskNumber(_In_ DWORD dwDeviceNumber)

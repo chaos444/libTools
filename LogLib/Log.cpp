@@ -282,12 +282,12 @@ VOID libTools::CLog::ClearLogFile()
 	}
 }
 
-VOID libTools::CLog::SetSyncSendLog() _NOEXCEPT
+VOID libTools::CLog::SetSyncSendLog()
 {
 	_bSync = true;
 }
 
-VOID libTools::CLog::SetInfiniteSave() _NOEXCEPT
+VOID libTools::CLog::SetInfiniteSave()
 {
 	_InfiniteSave = true;
 }

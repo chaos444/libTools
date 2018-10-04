@@ -84,9 +84,9 @@ namespace libTools
 
 		VOID ClearLogFile();
 
-		VOID SetSyncSendLog() _NOEXCEPT;
+		VOID SetSyncSendLog();
 
-		VOID SetInfiniteSave() _NOEXCEPT;
+		VOID SetInfiniteSave();
 
 		UINT FormLogSize();
 

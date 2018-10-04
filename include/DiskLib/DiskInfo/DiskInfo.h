@@ -10,7 +10,16 @@ namespace libTools
 	class CDiskInfo
 	{
 	private:
-	private:
+		enum class em_Disk_SatType
+		{
+			SAT, JMICRON, SUNPLUS, CYPRESS, LOGITEC1, LOGITEC2,
+		};
+
+		enum class em_Disk_NVMe
+		{
+			Media, JMicron
+		};
+
 #define SPT_CDB_LENGTH  32
 #define SPT_SENSE_LENGTH  32
 #define SPTWB_DATA_LENGTH  512
@@ -132,7 +141,33 @@ namespace libTools
 			WORD		Reserved10[19];							//236-254
 			WORD		IntegrityWord;							//255
 		};
+
+
 #pragma	pack(pop)
+
+#define	FILE_DEVICE_SCSI							0x0000001b
+#define	IOCTL_SCSI_MINIPORT_IDENTIFY				((FILE_DEVICE_SCSI << 16) + 0x0501)
+#define	IOCTL_SCSI_MINIPORT_READ_SMART_ATTRIBS		((FILE_DEVICE_SCSI << 16) + 0x0502)
+#define IOCTL_SCSI_MINIPORT_READ_SMART_THRESHOLDS	((FILE_DEVICE_SCSI << 16) + 0x0503)
+#define IOCTL_SCSI_MINIPORT_ENABLE_SMART			((FILE_DEVICE_SCSI << 16) + 0x0504)
+#define IOCTL_SCSI_MINIPORT_DISABLE_SMART			((FILE_DEVICE_SCSI << 16) + 0x0505)
+
+#define IOCTL_SCSI_BASE                 FILE_DEVICE_CONTROLLER
+#define IOCTL_SCSI_PASS_THROUGH         CTL_CODE(IOCTL_SCSI_BASE, 0x0401, METHOD_BUFFERED, FILE_READ_ACCESS | FILE_WRITE_ACCESS)
+
+		//
+		// Define values for pass-through DataIn field.
+		//
+#define SCSI_IOCTL_DATA_OUT          0
+#define SCSI_IOCTL_DATA_IN           1
+#define SCSI_IOCTL_DATA_UNSPECIFIED  2
+
+
+		typedef struct _SCSI_PASS_THROUGH_WITH_BUFFERS24 {
+			SCSI_PASS_THROUGH Spt;
+			UCHAR             SenseBuf[24];
+			UCHAR             DataBuf[4096];
+		} SCSI_PASS_THROUGH_WITH_BUFFERS24, *PSCSI_PASS_THROUGH_WITH_BUFFERS24;
 	public:
 		CDiskInfo() = default;
 		~CDiskInfo() = default;
@@ -171,6 +206,15 @@ namespace libTools
 		// Value/GB
 		static UINT GetDiskSize(_In_ WCHAR whcDisk);
 	private:
+		// 
+		static BOOL GetUsbDriverSerialNumber_By_SatType(_In_ HANDLE hDisk, _In_ em_Disk_SatType emSatType, _Out_ std::wstring& wsSerailNumber);
+
+		//
+		static BOOL GetUsbDriverSerailNumber_By_NvmeAsMedia(_In_ HANDLE hDisk, _Out_ std::wstring& wsSerailNumber);
+
+		//
+		static BOOL GetUsbDriverSerialNumber_By_NvmeJMicron(_In_ HANDLE hDisk, _Out_ std::wstring& wsSerailNumber);
+
 		template<typename T>
 		static VOID FormatDiskSerialNumber(_In_ T* pszSeralNumber)
 		{
