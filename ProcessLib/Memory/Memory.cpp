@@ -71,7 +71,7 @@ std::wstring libTools::CMemory::ReadUTF8Text(_In_ UINT_PTR dwAddr)
 	{
 		return std::wstring();
 	}
-	else if (ReadDWORD(dwAddr + 0x14) >= 0xF)
+	else if (ReadDWORD(dwAddr + 0x14) > 0xF)
 	{
 		CONST CHAR* pszText = reinterpret_cast<CONST CHAR*>(ReadMemValue(dwAddr));
 		if (pszText == nullptr)
@@ -94,7 +94,7 @@ std::wstring libTools::CMemory::ReadASCIIText(_In_ UINT_PTR dwAddr)
 	{
 		return std::wstring();
 	}
-	else if (ReadDWORD(dwAddr + 0x14) >= 0xF)
+	else if (ReadDWORD(dwAddr + 0x14) > 0xF)
 	{
 		CONST CHAR* pszText = reinterpret_cast<CONST CHAR*>(ReadMemValue(dwAddr));
 		if (pszText == nullptr)
@@ -117,7 +117,7 @@ std::wstring libTools::CMemory::ReadUnicodeText(_In_ UINT_PTR dwAddr)
 	{
 		return std::wstring();
 	}
-	else if (ReadDWORD(dwAddr + 0x14) >= 0xF)
+	else if (ReadDWORD(dwAddr + 0x14) > 0xF)
 	{
 		CONST WCHAR* pszText = reinterpret_cast<CONST WCHAR*>(ReadMemValue(dwAddr));
 		if (pszText == nullptr)

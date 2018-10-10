@@ -146,7 +146,7 @@ BOOL libTools::CNoTraceModuleInjector::UnHook()
 {
 	return CInlineHook::UnHook(_NtOpenFilePtr, _NtOpenFilePtr_Old) &&
 		CInlineHook::UnHook(_NtCreateSectionPtr, _NtCreateSectionPtr_Old) &&
-		CInlineHook::UnHook(_NtQueryAttributesFilePtr, _NtQuerySectionPtr_Old) &&
+		CInlineHook::UnHook(_NtQuerySectionPtr, _NtQuerySectionPtr_Old) &&
 		CInlineHook::UnHook(_NtMapViewOfSectionPtr, _NtMapViewOfSectionPtr_Old) &&
 		CInlineHook::UnHook(_NtClosePtr, _NtClosePtr_Old) &&
 		CInlineHook::UnHook(_NtQueryAttributesFilePtr, _NtQueryAttributesFilePtr_Old);

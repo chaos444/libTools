@@ -3,7 +3,6 @@
 
 #include <Windows.h>
 #include <string>
-#include <ntddscsi.h>
 
 namespace libTools
 {
@@ -24,6 +23,22 @@ namespace libTools
 #define SPT_SENSE_LENGTH  32
 #define SPTWB_DATA_LENGTH  512
 
+		typedef struct _SCSI_PASS_THROUGH {
+			USHORT Length;
+			UCHAR ScsiStatus;
+			UCHAR PathId;
+			UCHAR TargetId;
+			UCHAR Lun;
+			UCHAR CdbLength;
+			UCHAR SenseInfoLength;
+			UCHAR DataIn;
+			ULONG DataTransferLength;
+			ULONG TimeOutValue;
+			ULONG_PTR DataBufferOffset;
+			ULONG SenseInfoOffset;
+			UCHAR Cdb[16];
+		}SCSI_PASS_THROUGH, *PSCSI_PASS_THROUGH;
+
 		struct SCSI_PASS_THROUGH_WITH_BUFFERS
 		{
 			SCSI_PASS_THROUGH Spt;
@@ -31,6 +46,22 @@ namespace libTools
 			UCHAR             SenseBuf[32];
 			UCHAR             DataBuf[4096];
 		};
+
+		typedef struct _SCSI_PASS_THROUGH_DIRECT {
+			USHORT Length;
+			UCHAR ScsiStatus;
+			UCHAR PathId;
+			UCHAR TargetId;
+			UCHAR Lun;
+			UCHAR CdbLength;
+			UCHAR SenseInfoLength;
+			UCHAR DataIn;
+			ULONG DataTransferLength;
+			ULONG TimeOutValue;
+			PVOID DataBuffer;
+			ULONG SenseInfoOffset;
+			UCHAR Cdb[16];
+		}SCSI_PASS_THROUGH_DIRECT, *PSCSI_PASS_THROUGH_DIRECT;
 
 		typedef struct _SCSI_PASS_THROUGH_DIRECT_WITH_BUFFER
 		{

@@ -86,6 +86,8 @@ namespace libTools
 
 		CSocketBuffer& operator >> (std::wstring& wsText);
 
+		CSocketBuffer& operator >> (int& nValue);
+
 		// 
 		std::shared_ptr<CHAR> GetBuffer(_Out_ UINT& uSize);
 

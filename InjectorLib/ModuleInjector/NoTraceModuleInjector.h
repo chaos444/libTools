@@ -1,10 +1,8 @@
 #ifndef __LIBTOOLS_INJECTORLIB_MODULEINJECTOR_NOTRACEMODULEINJECTOR_H__
 #define __LIBTOOLS_INJECTORLIB_MODULEINJECTOR_NOTRACEMODULEINJECTOR_H__
 
-#define WIN32_NO_STATUS
+
 #include <Windows.h>
-#undef WIN32_NO_STATUS
-#include <ntstatus.h>
 #include <winternl.h>
 #include <string>
 
@@ -33,6 +31,11 @@ namespace libTools
 #define LMD_REMOVE_EAT              0x00000004
 #define LMD_REMOVE_RES              0x00000008
 #define LMD_MAPPED_DLL              0x10000000
+
+#define STATUS_UNSUCCESSFUL			0xC0000001L
+#define STATUS_SUCCESS				0x00000000L
+#define STATUS_IMAGE_NOT_AT_BASE    0x40000003L
+#define STATUS_BUFFER_TOO_SMALL     0xC0000023L
 
 		typedef enum _SECTION_INHERIT
 		{

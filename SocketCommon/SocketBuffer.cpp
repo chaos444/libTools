@@ -157,6 +157,11 @@ libTools::CSocketBuffer& libTools::CSocketBuffer::operator>>(UINT& uValue)
 }
 
 
+libTools::CSocketBuffer& libTools::CSocketBuffer::operator>>(int& nValue)
+{
+	return *this >> reinterpret_cast<DWORD&>(nValue);
+}
+
 std::shared_ptr<CHAR> libTools::CSocketBuffer::GetBuffer(_Out_ UINT& uSize)
 {
 	uSize = static_cast<UINT>(_Data.size());

@@ -1,6 +1,7 @@
 #include "LdrHeader.h"
 #include <stdlib.h>
 #include <include/CharacterLib/Character.h>
+#include <ProcessLib/Process/ProcessModule.h>
 #include "Dasm.h"
 
 #ifdef _DEBUG
@@ -104,6 +105,27 @@ namespace libTools
 
 		//开始backup函数开头的字
 		memcpy((BYTE *)lpHookFunc + JMP_SIZE, OrgProc, dwPatchSize);
+		if (*reinterpret_cast<BYTE*>(OrgProc) == 0xE9)
+		{
+			std::vector<CProcessModule::ProcessModuleContent> Vec;
+			CProcessModule::GetProcessModule(::GetCurrentProcess(), Vec);
+			for (auto& itm : Vec)
+			{
+				if (reinterpret_cast<DWORD>(OrgProc) > itm.dwImageBase && reinterpret_cast<DWORD>(OrgProc) < itm.dwImageBase + itm.dwImageSize)
+				{
+					DWORD dwRelativeAddr = (DWORD)OrgProc - (itm.dwImageBase + 0x1000) + 0x1000 + 0x1;
+					dwRelativeAddr += itm.dwImageBase;
+					DWORD dwReadAddr = *(DWORD*)(dwRelativeAddr);
+					dwReadAddr += 4;
+					dwReadAddr += dwRelativeAddr;
+					DWORD dwCALL = dwReadAddr & 0xFFFFFFFF;
+
+
+					DWORD dwNewCALL = dwCALL - ((DWORD)lpHookFunc + JMP_SIZE) - JMP_SIZE;
+					*(DWORD *)((DWORD)lpHookFunc + JMP_SIZE + 0x1) = dwNewCALL;
+				}
+			}
+		}
 
 		lpPatchBuffer = (LPBYTE)__malloc(dwPatchSize);
 

@@ -47,7 +47,7 @@ namespace libTools
 				return false;
 			}
 
-			return CException::InvokeFunc<bool>(__FUNCTIONW__, [=]
+			return CException::InvokeFunc<bool>(__FUNCTIONW__, [&]
 			{
 				while (*dest != '\0')
 				{
@@ -156,7 +156,7 @@ namespace libTools
 				wsTmpText = wsTmpText.substr(nIndex + strlen_my(wsFormat));
 				nIndex = wsTmpText.find(wsFormat);
 			}
-			if (!wsTmpText.empty() || vlst.size() > 0 || (emOption & em_Split_Option_KeepOnly))
+			if (!wsTmpText.empty() && (vlst.size() > 0 || (emOption & em_Split_Option_KeepOnly)))
 			{
 				vlst.push_back(wsTmpText);
 			}

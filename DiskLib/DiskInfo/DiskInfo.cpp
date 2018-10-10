@@ -1,13 +1,8 @@
 #include "DiskInfo.h"
 #include <filesystem>
-#include <devioctl.h>
-#include <ntdddisk.h>
-#define _NTSCSI_USER_MODE_
-#include <scsi.h>
 #include <include/ProcessLib/Common/ResHandleManager.h>
 #include <include/LogLib/Log.h>
 #include <include/CharacterLib/Character.h>
-#include <iostream>
 
 #define _SELF L"DiskInfo.cpp"
 BOOL libTools::CDiskInfo::GetDiskSerailNumber_BySCSI(_In_ WCHAR wchDisk, _Out_ std::wstring& wsSerailNumber)
