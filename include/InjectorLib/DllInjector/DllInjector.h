@@ -26,7 +26,7 @@ namespace libTools
 
 		//
 		static BOOL IsRunAsAdministrator();
-	private:
+
 		// 
 		static BOOL RaisePrivilige(_In_ LPCWSTR pwszPrivilegeName);
 	};

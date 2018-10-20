@@ -1,12 +1,16 @@
 #include "DllInjector.h"
 #include <Shlwapi.h>
+#include <AclAPI.h>
 #include <include/ProcessLib/Common/ResHandleManager.h>
 #include <include/LogLib/Log.h>
+#include <include/CharacterLib/Character.h>
 
 #ifdef _DEBUG
 #pragma comment(lib,"LogLib_Debug.lib")
+#pragma comment(lib,"CharacterLib_Debug.lib")
 #else
 #pragma comment(lib,"LogLib.lib")
+#pragma comment(lib,"CharacterLib.lib")
 #endif // _DEBUG
 
 #pragma comment(lib,"Advapi32.lib")
@@ -203,7 +207,7 @@ BOOL libTools::CDllInjector::CreateProcess_And_ShellCodeInjectorDLL(_In_ CONST s
 	return TRUE;
 }
 
-BOOL libTools::CDllInjector::PromotionAuthority()
+BOOL libTools::CDllInjector::PromotionDebugPrivlige()
 {
 	return RaisePrivilige(SE_DEBUG_NAME) && RaisePrivilige(SE_SECURITY_NAME);
 }
@@ -250,5 +254,72 @@ BOOL libTools::CDllInjector::RaisePrivilige(_In_ LPCWSTR pwszPrivilegeName)
 
 	::CloseHandle(hToken);
 	hToken = NULL;
+	return TRUE;
+}
+
+BOOL libTools::CDllInjector::PromotionBackupPrivlige()
+{
+	return RaisePrivilige(SE_BACKUP_NAME) && RaisePrivilige(SE_RESTORE_NAME);
+}
+
+BOOL libTools::CDllInjector::AddModifyWin7SystemFilePrivlige(_In_ CONST std::wstring& wsFilePath)
+{
+	HANDLE hToken = NULL;
+	if (!::OpenProcessToken(::GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &hToken))
+		return FALSE;
+
+	SetResDeleter(hToken, [](HANDLE& h) { ::CloseHandle(h); });
+	if (!RaisePrivilige(SE_TAKE_OWNERSHIP_NAME))
+		return FALSE;
+
+
+	SID_IDENTIFIER_AUTHORITY SIDAuthWorld = SECURITY_WORLD_SID_AUTHORITY;
+	PSID pSIDEveryone = NULL;
+	if (!AllocateAndInitializeSid(&SIDAuthWorld, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0, &pSIDEveryone))
+		return FALSE;
+
+	SetResDeleter(pSIDEveryone, [](PSID& p) { ::FreeSid(p); });
+	SID_IDENTIFIER_AUTHORITY SIDAuthNT = SECURITY_NT_AUTHORITY;
+	PSID pSIDAdmin = NULL;
+	if (!AllocateAndInitializeSid(&SIDAuthNT, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &pSIDAdmin))
+		return FALSE;
+
+
+	SetResDeleter(pSIDAdmin, [](PSID& p) { ::FreeSid(p); });
+	WCHAR wszFilePath[MAX_PATH] = { 0 };
+	libTools::CCharacter::strcpy_my(wszFilePath, wsFilePath.c_str());
+	if (SetNamedSecurityInfoW(wszFilePath, SE_FILE_OBJECT, OWNER_SECURITY_INFORMATION, pSIDAdmin, NULL, NULL, NULL) != ERROR_SUCCESS)
+		return FALSE;
+
+
+	const int NUM_ACES = 2;
+	EXPLICIT_ACCESS ExplicitAccessArray[NUM_ACES];
+	ZeroMemory(ExplicitAccessArray, sizeof(ExplicitAccessArray) * NUM_ACES);
+
+
+	ExplicitAccessArray[0].grfAccessPermissions = GENERIC_ALL;
+	ExplicitAccessArray[0].grfAccessMode = SET_ACCESS;
+	ExplicitAccessArray[0].grfInheritance = NO_INHERITANCE;
+	ExplicitAccessArray[0].Trustee.TrusteeForm = TRUSTEE_IS_SID;
+	ExplicitAccessArray[0].Trustee.TrusteeType = TRUSTEE_IS_WELL_KNOWN_GROUP;
+	ExplicitAccessArray[0].Trustee.ptstrName = (LPTSTR)pSIDEveryone;
+	ExplicitAccessArray[1].grfAccessPermissions = GENERIC_ALL;
+	ExplicitAccessArray[1].grfAccessMode = SET_ACCESS;
+	ExplicitAccessArray[1].grfInheritance = NO_INHERITANCE;
+	ExplicitAccessArray[1].Trustee.TrusteeForm = TRUSTEE_IS_SID;
+	ExplicitAccessArray[1].Trustee.TrusteeType = TRUSTEE_IS_WELL_KNOWN_GROUP;
+	ExplicitAccessArray[1].Trustee.ptstrName = (LPTSTR)pSIDAdmin;
+
+
+	PACL pNewDACL = NULL;
+	if (SetEntriesInAclW(NUM_ACES, ExplicitAccessArray, NULL, &pNewDACL) != ERROR_SUCCESS)
+		return FALSE;
+
+
+	SetResDeleter(pNewDACL, [](PACL& p) { ::LocalFree(p); });
+	if (SetNamedSecurityInfoW(wszFilePath, SE_FILE_OBJECT, DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION, NULL, NULL, pNewDACL, NULL) != ERROR_SUCCESS)
+		return FALSE;
+
+
 	return TRUE;
 }
