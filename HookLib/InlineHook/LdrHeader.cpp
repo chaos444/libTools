@@ -93,7 +93,7 @@ namespace libTools
 		JMP	/ FAR 0xAABBCCDD		E9 DDCCBBAA		JMP_SIZE
 		*/
 
-		dwBytesNeed = sizeof(DWORD) + JMP_SIZE + dwPatchSize + JMP_SIZE;
+		dwBytesNeed = sizeof(DWORD) + JMP_SIZE + dwPatchSize + JMP_SIZE + 0x5/*最初始的代码*/;
 
 		lpHookFunc = __malloc(dwBytesNeed);
 
@@ -123,6 +123,8 @@ namespace libTools
 
 					DWORD dwNewCALL = dwCALL - ((DWORD)lpHookFunc + JMP_SIZE) - JMP_SIZE;
 					*(DWORD *)((DWORD)lpHookFunc + JMP_SIZE + 0x1) = dwNewCALL;
+					memcpy((BYTE *)lpHookFunc + JMP_SIZE + dwPatchSize + JMP_SIZE, OrgProc, 5);
+					break;
 				}
 			}
 		}
@@ -166,7 +168,10 @@ namespace libTools
 		//得到dwPatchSize
 		dwPatchSize = *(DWORD *)lpBuffer;
 
-		WriteReadOnlyMemory((LPBYTE)OrgProc, (LPBYTE)RealProc, dwPatchSize);
+		if (*reinterpret_cast<BYTE*>(RealProc) == 0xE9)
+			WriteReadOnlyMemory((LPBYTE)OrgProc, (LPBYTE)(lpBuffer + sizeof(DWORD) + JMP_SIZE + dwPatchSize + JMP_SIZE), dwPatchSize);
+		else
+			WriteReadOnlyMemory((LPBYTE)OrgProc, (LPBYTE)RealProc, dwPatchSize);
 
 		//释放分配的跳转函数的空间
 		__free(lpBuffer);
