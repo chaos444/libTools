@@ -294,7 +294,7 @@ BOOL libTools::CDllInjector::AddModifyWin7SystemFilePrivlige(_In_ CONST std::wst
 
 	const int NUM_ACES = 2;
 	EXPLICIT_ACCESS ExplicitAccessArray[NUM_ACES];
-	ZeroMemory(ExplicitAccessArray, sizeof(ExplicitAccessArray) * NUM_ACES);
+	ZeroMemory(ExplicitAccessArray, sizeof(ExplicitAccessArray));
 
 
 	ExplicitAccessArray[0].grfAccessPermissions = GENERIC_ALL;

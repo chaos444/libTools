@@ -21,14 +21,20 @@ namespace libTools
 		// Create Process and Injector DLL to this Process .. (wsDllPath couldn't be empty) use shellcode to Injector DLL ....
 		static BOOL CreateProcess_And_ShellCodeInjectorDLL(_In_ CONST std::wstring& wsProcessCommand, _In_ CONST std::wstring& wsDllPath, _Out_opt_ PROCESS_INFORMATION* pProcInfo = nullptr);
 
-		// Promote
-		static BOOL PromotionAuthority();
+		// Debug权限
+		static BOOL PromotionDebugPrivlige();
 
 		//
 		static BOOL IsRunAsAdministrator();
 
 		// 
 		static BOOL RaisePrivilige(_In_ LPCWSTR pwszPrivilegeName);
+
+		// win7的backup 和 restore权限
+		static BOOL PromotionBackupPrivlige();
+
+		// 修改win7系统文件的权限
+		static BOOL AddModifyWin7SystemFilePrivlige(_In_ CONST std::wstring& wsFilePath);
 	};
 }
 
