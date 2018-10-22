@@ -63,6 +63,9 @@ namespace libTools
 
 		// Remove File (Remove File Some Attribute)
 		static BOOL WINAPI ForceDeleteFile(_In_ CONST std::wstring& wsPath);
+
+		// GetFileSize in (::GetAttributesEx) (Size < 2GB)
+		static UINT WINAPI GetFileSize(_In_ CONST std::wstring& wsFilePath);
 	};
 
 }

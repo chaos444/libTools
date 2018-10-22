@@ -366,4 +366,15 @@ namespace libTools
 		return TRUE;
 	}
 
+
+	UINT WINAPI CFile::GetFileSize(_In_ CONST std::wstring& wsFilePath)
+	{
+		WIN32_FILE_ATTRIBUTE_DATA FileAttribute = { 0 };
+		if (!::GetFileAttributesExW(wsFilePath.c_str(), GetFileExInfoStandard, &FileAttribute))
+			return 0;
+
+
+		return FileAttribute.nFileSizeLow;
+	}
+
 }
