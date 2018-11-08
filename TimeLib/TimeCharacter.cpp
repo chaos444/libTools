@@ -135,6 +135,14 @@ VOID libTools::CTimeCharacter::FormatTime(_In_ ULONGLONG ulResult, _Out_opt_ std
 	wsText = CCharacter::MakeFormatText(L"%I64dDay %I64dHour %I64dMin %I64dSec", ulDay, ulHour, ulMin, ulSecond);
 }
 
+
+libTools::CTimeCharacter::TimeContent libTools::CTimeCharacter::GetCurrentTick()
+{
+	SYSTEMTIME SysTime = { 0 };
+	::GetLocalTime(&SysTime);
+	return TimeContent(SysTime);
+}
+
 VOID libTools::CTimeCharacter::FormatTime(_In_ em_FormatType emType, _Out_ std::wstring& wsText)
 {
 	SYSTEMTIME SysTime = { 0 };

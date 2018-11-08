@@ -202,7 +202,7 @@ namespace Log
                 CopyStruct = (COPYDATASTRUCT)((Message)m).GetLParam(CopyStruct.GetType());
                 if (CopyStruct.dwData.ToInt32() == 0x4C6F67)
                 {
-                    lock (_Queue) { _Queue.Enqueue(CopyStruct.lpData); }
+                    Task.Factory.StartNew(() => { lock (_Queue) { _Queue.Enqueue(CopyStruct.lpData); } });
                 }
             }
            
@@ -213,6 +213,7 @@ namespace Log
         {
             if (!new Code.CXmlConfig().InitConfig())
                 Application.Exit();
+
 
             dgvLog.AutoGenerateColumns = false;
             dgvLog.AllowUserToAddRows = false;

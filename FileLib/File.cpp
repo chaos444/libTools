@@ -218,10 +218,10 @@ namespace libTools
 		return CException::InvokeFunc<BOOL>(__FUNCTIONW__, [&]
 		{
 			FILE* pFile = nullptr;
-			_wfopen_s(&pFile, cwsPath.c_str(), L"a");
+			_wfopen_s(&pFile, cwsPath.c_str(), L"a+");
 			if (pFile == NULL)
 			{
-				::MessageBoxW(NULL, CCharacter::MakeFormatText(L"创建文件:%s 失败!", cwsPath.c_str()).c_str(), L"Error", NULL);
+				::MessageBoxW(NULL, CCharacter::MakeFormatText(L"创建文件:[%s] 失败!", cwsPath.c_str()).c_str(), L"CreateUnicodeTextFile", NULL);
 				return FALSE;
 			}
 

@@ -61,6 +61,9 @@ namespace libTools
 
 		//
 		static VOID FormatTime(_In_ em_FormatType emType, _Out_ std::wstring& wsText);
+
+		//
+		static TimeContent GetCurrentTick();
 	private:
 
 	};

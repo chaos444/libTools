@@ -232,7 +232,7 @@ BOOL libTools::CDiskInfo::GetUsbDriverSerialNumber_By_SatType(_In_ HANDLE hDisk,
 		Buffer.Spt.SenseInfoLength = 24;
 		Buffer.Spt.DataIn = SCSI_IOCTL_DATA_IN;
 		Buffer.Spt.DataTransferLength = IDENTIFY_BUFFER_SIZE;
-		Buffer.Spt.TimeOutValue = 0x1A5E0;
+		Buffer.Spt.TimeOutValue = 2;
 		Buffer.Spt.DataBufferOffset = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS, DataBuf);
 		Buffer.Spt.SenseInfoOffset = offsetof(SCSI_PASS_THROUGH_WITH_BUFFERS, SenseBuf);
 
