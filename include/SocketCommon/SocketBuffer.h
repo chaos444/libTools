@@ -68,6 +68,8 @@ namespace libTools
 
 		CSocketBuffer& operator << (CONST std::wstring& wsText);
 
+		CSocketBuffer& operator << (CONST SYSTEMTIME& Tick);
+
 		CSocketBuffer& operator << (LPCWSTR lpwszText);
 
 		CSocketBuffer& operator >> (DWORD& dwValue);
@@ -87,6 +89,8 @@ namespace libTools
 		CSocketBuffer& operator >> (std::wstring& wsText);
 
 		CSocketBuffer& operator >> (int& nValue);
+
+		CSocketBuffer& operator >> (SYSTEMTIME& Tick);
 
 		// 
 		std::shared_ptr<CHAR> GetBuffer(_Out_ UINT& uSize);

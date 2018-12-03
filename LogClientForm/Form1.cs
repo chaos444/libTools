@@ -244,7 +244,7 @@ namespace Log
             // Set Search Text Function
             fnSearchTextPtr = (string strKeyWork) =>
             {
-                List<Code.CFindLogContent> LogResult = new List<Code.CFindLogContent>();
+                var LogResult = new List<Code.CFindLogContent>();
                 try
                 {
                     lock (dgvLog)

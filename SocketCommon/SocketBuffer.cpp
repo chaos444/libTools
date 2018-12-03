@@ -88,6 +88,11 @@ libTools::CSocketBuffer& libTools::CSocketBuffer::operator<<(CONST std::wstring&
 	return *this;
 }
 
+libTools::CSocketBuffer& libTools::CSocketBuffer::operator<<(CONST SYSTEMTIME& Tick)
+{
+	return *this << Tick.wYear << Tick.wMonth << Tick.wDay << Tick.wDayOfWeek << Tick.wHour << Tick.wMinute << Tick.wSecond << Tick.wMilliseconds;
+}
+
 libTools::CSocketBuffer& libTools::CSocketBuffer::operator<<(LPCWSTR lpwszText)
 {
 	return *this << std::wstring(lpwszText);
@@ -160,6 +165,11 @@ libTools::CSocketBuffer& libTools::CSocketBuffer::operator>>(UINT& uValue)
 libTools::CSocketBuffer& libTools::CSocketBuffer::operator>>(int& nValue)
 {
 	return *this >> reinterpret_cast<DWORD&>(nValue);
+}
+
+libTools::CSocketBuffer& libTools::CSocketBuffer::operator>>(SYSTEMTIME& Tick)
+{
+	return *this >> Tick.wYear >> Tick.wMonth >> Tick.wDay >> Tick.wDayOfWeek >> Tick.wHour >> Tick.wMinute >> Tick.wSecond >> Tick.wMilliseconds;
 }
 
 std::shared_ptr<CHAR> libTools::CSocketBuffer::GetBuffer(_Out_ UINT& uSize)

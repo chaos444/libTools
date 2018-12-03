@@ -1,8 +1,8 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
-#include <winsock2.h>
+#include <WinSock2.h>
 #include "SocketBaseClientService.h"
-#include <Ws2tcpip.h> // getaddrinfo
-#include <mswsock.h>  // WSAIoctl
+#include <WS2tcpip.h> // getaddrinfo
+#include <MSWSock.h>  // WSAIoctl
 #include <include/LogLib/Log.h>
 #include <include/ExceptionLib/Exception.h>
 #include <include/SocketCommon/SocketBuffer.h>
@@ -132,8 +132,7 @@ VOID CALLBACK libTools::CSocketBaseClientService::IoCompletionCallback(PTP_CALLB
 BOOL libTools::CSocketBaseClientService::PostConnect()
 {
 	// Get Address Info
-	addrinfo hints;
-	ZeroMemory(&hints, sizeof(addrinfo));
+	addrinfo hints = { 0 };
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
@@ -160,7 +159,7 @@ BOOL libTools::CSocketBaseClientService::PostConnect()
 		if (!ConnectEx(pAddr->ai_addr, pAddr->ai_addrlen, &pIoEvent->GetOverlapped()))
 		{
 			::freeaddrinfo(pAddrinfo);
-			auto Error = ::WSAGetLastError();
+			const auto Error = ::WSAGetLastError();
 			if (Error != ERROR_IO_PENDING)
 			{
 				LOG_CF_E(L"ConnectEx Faild! Err=%d", Error);
@@ -194,47 +193,68 @@ VOID libTools::CSocketBaseClientService::OnRecv(_In_ DWORD NumberOfBytesTransfer
 	{
 		if (_dwRecvSize == 0 && NumberOfBytesTransferred < 4)
 		{
+			// 没接收完
 			SetBuffer(_RecvBuffer, NumberOfBytesTransferred);
+			PostRecv();
 		}
 		else
 		{
 			if (_dwRecvSize == 0)
 			{
+				// Set Packet MaxSize
 				CSocketBuffer::SetValue_By_Buffer(_dwRecvSize, reinterpret_cast<BYTE*>(_RecvBuffer));
 			}
+
 
 			CHAR* Buffer = _RecvBuffer;
 			while (NumberOfBytesTransferred + _VecBuffer.size() >= _dwRecvSize)
 			{
-				auto BufferIndex = static_cast<int>(_dwRecvSize - _VecBuffer.size());
-				if (BufferIndex < 0 || BufferIndex > 1024)
-					LOG_CF_E(L"dwBufferSize=%d", BufferIndex);
+				const auto PacketSize = static_cast<int>(_dwRecvSize - _VecBuffer.size());
+				if (PacketSize < 0 || PacketSize > 1024)
+					LOG_MSG_CF(L"PacketSize=%d", PacketSize);
 
-				CSocketBuffer* pSocketBuffer = new CSocketBuffer;
-				SetBuffer(Buffer, BufferIndex);
-				pSocketBuffer->SetDataPtr(_VecBuffer.data(), _VecBuffer.size());
+
+				// Tranfer Data to _VecBuffer
+				CSocketBuffer SocketBuffer;
+				SetBuffer(Buffer, PacketSize);
+
+
+				// Tranfer _VecBuffer Data to SocketBuffer
+				SocketBuffer.SetDataPtr(_VecBuffer.data(), _VecBuffer.size());
 				_VecBuffer.clear();
 
+
+				Buffer += PacketSize;
 				CException::InvokeAction(L"ExcuteAsync.EchoPacket", [&]
 				{
-					EchoPacket(*pSocketBuffer);
-					delete pSocketBuffer;
+					EchoPacket(SocketBuffer);
+					SocketBuffer.clear();
 				});
 
 
-				// abandon be left Packet...
-				ZeroMemory(_RecvBuffer, sizeof(_RecvBuffer));
-				NumberOfBytesTransferred = 0;
-				_dwRecvSize = 0;
-				break;
+
+				NumberOfBytesTransferred -= PacketSize;
+				if (NumberOfBytesTransferred >= 4)
+				{
+					// Set Packet MaxSize
+					CSocketBuffer::SetValue_By_Buffer(_dwRecvSize, reinterpret_cast<BYTE*>(_RecvBuffer));
+				}
+				else
+				{
+					NumberOfBytesTransferred = NULL;
+					_dwRecvSize = 0;
+					break;
+				}
 			}
 
 			if (static_cast<int>(NumberOfBytesTransferred) > 0)
 			{
-				// keep save
-				SetBuffer(_RecvBuffer, NumberOfBytesTransferred);
-
+				// Save Surplus Data(_RecvBuffer) to _VecBuffer
+				SetBuffer(Buffer, NumberOfBytesTransferred);
 				ZeroMemory(_RecvBuffer, sizeof(_RecvBuffer));
+
+
+				// Wait to Next Recv
 				PostRecv();
 			}
 		}
@@ -276,7 +296,7 @@ VOID libTools::CSocketBaseClientService::PostRecv()
 		_ExistPostRecv = TRUE;
 		if (::WSARecv(_ServerSocket, &recvBufferDescriptor, 1, &dwNumberOfBytes, &dwRecvFlags, &pIoEvent->GetOverlapped(), NULL) == SOCKET_ERROR)
 		{
-			auto Error = ::WSAGetLastError();
+			const auto Error = ::WSAGetLastError();
 			if (Error != ERROR_IO_PENDING)
 			{
 				LOG_CF_E(L"WSARecv Faild. Err=%d", Error);
@@ -304,7 +324,7 @@ BOOL libTools::CSocketBaseClientService::CreateServerSocket()
 	WSAStartup(WINSOCK_VERSION, &wd);
 
 	// Get Address Info
-	addrinfo hints;
+	addrinfo hints = { 0 };
 	ZeroMemory(&hints, sizeof(addrinfo));
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
